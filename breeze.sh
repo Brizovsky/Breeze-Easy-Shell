@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.8.1"
+ver="v1.8.2 Beta"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -203,7 +203,7 @@ rm -f cwp-latest
 
 zpanel_install()
 {
-wget http://evtikhov.ru/zpanel.sh
+wget https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master/zpanel.sh
 sh zpanel.sh
 rm -f zpanel.sh
 }
@@ -429,7 +429,7 @@ space2=""
       done
 
 filename='breeze.sh'
-updpath='http://evtikhov.ru/'
+updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master/'
 
 #определяем сколько RAM
 mem_total=`cat /proc/meminfo | grep MemTotal | awk '{print $2}'`
