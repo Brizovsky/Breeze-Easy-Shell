@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.8.2 Beta"
+ver="v1.8.2"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -89,7 +89,7 @@ chmod 777 $filename
 
 undone()
 {
-echo "Данная функция в стадии разработки или отключена." #функция ставится в нереализованные пункты№№№№№№№№№№ меню в качестве заглушки
+echo "Данная функция в стадии разработки или отключена." #функция ставится в нереализованные пункты меню в качестве заглушки
 }
 
 settimezone()
@@ -1095,6 +1095,27 @@ fi
 	myread_dig pick
     case "$pick" in
 		1) #Проверить запущен ли планировщик (cron)
+		installed crond
+		if [ $exist == false ]; then 
+			echo "Сервис Cron не установлен. Установить?"
+			myread_yn pick
+			case "$pick" in
+				y|Y)
+					case "$osver1" in
+						4|5|6)
+							myinstall vixie-cron crontabs
+						;;
+						7)
+							myinstall cronie
+						;;
+					esac
+				br
+				echo "Установка завершена, продолжаем работу..."
+				wait
+				clear
+				;;
+			esac
+		fi
 		if [[ -n $(service crond status | grep "is running") ]]; then
 			echo "Планировщик Cron работает..."
 			wait
