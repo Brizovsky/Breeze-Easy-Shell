@@ -1432,6 +1432,7 @@ myread_dig pick
       y|Y)
         wget "http://download.ispsystem.com/install.4.sh" -r -N -nd
         sh install.4.sh
+        wait
         rm -f install.4.sh
       ;;
     esac
