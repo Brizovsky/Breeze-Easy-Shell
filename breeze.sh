@@ -101,7 +101,7 @@ wait
 
 repo4()
 {
-echo "Будут добавлены репозитории для CentOS 4 x64"
+echo "Будут добавлены репозитории для CentOS 4"
 wait
 echo "Устанавливаем репозитории..."
 	case "$arc" in
@@ -118,11 +118,11 @@ echo "Устанавливаем репозитории..."
 
 repo5()
 {
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5 x64"
+echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
 wait
 echo "Устанавливаем репозитории..."
 #rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
-rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+yum -y install epel-release
 rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
 	case "$arc" in
         32)
@@ -142,12 +142,12 @@ wait
 
 repo6()
 {
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6 x64"
+echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
 wait
 echo "Устанавливаем репозитории..."
 #rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
 #rpm --import https://fedoraproject.org/static/0608B895.txt
-rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+yum -y install epel-release
 rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 	case "$arc" in
         32)
@@ -167,7 +167,7 @@ wait
 
 repo7()
 {
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7 x64"
+echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
 wait
 echo "Устанавливаем репозитории..."
 #rpm --import https://fedoraproject.org/static/0608B895.txt
