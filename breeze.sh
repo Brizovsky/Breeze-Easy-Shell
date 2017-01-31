@@ -121,7 +121,7 @@ repo5()
 echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5 x64"
 wait
 echo "Устанавливаем репозитории..."
-rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
+#rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
 rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
 	case "$arc" in
@@ -145,8 +145,8 @@ repo6()
 echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6 x64"
 wait
 echo "Устанавливаем репозитории..."
-rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-rpm --import https://fedoraproject.org/static/0608B895.txt
+#rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
+#rpm --import https://fedoraproject.org/static/0608B895.txt
 rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 	case "$arc" in
@@ -170,8 +170,8 @@ repo7()
 echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7 x64"
 wait
 echo "Устанавливаем репозитории..."
-rpm --import https://fedoraproject.org/static/0608B895.txt
-rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
+#rpm --import https://fedoraproject.org/static/0608B895.txt
+#rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
 rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
 yum -y install epel-release
 rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
