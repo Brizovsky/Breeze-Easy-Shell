@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.8.2"
+ver="v1.8.3"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -104,9 +104,16 @@ repo4()
 echo "Будут добавлены репозитории для CentOS 4 x64"
 wait
 echo "Устанавливаем репозитории..."
-wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
-rpm -K rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
-rpm -i rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
+	case "$arc" in
+        32)
+		wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+		rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+        ;;
+        64)
+		wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+		rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+        ;;
+	esac
 }
 
 repo5()
@@ -117,9 +124,16 @@ echo "Устанавливаем репозитории..."
 rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
 rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
-wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
-rpm -K rpmforge-release-0.5.3-1.el5.rf.*.rpm
-rpm -i rpmforge-release-0.5.3-1.el5.rf.*.rpm
+	case "$arc" in
+        32)
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
+		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
+        ;;
+        64)
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
+        rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
+        ;;
+	esac
 rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
 br
 echo "Репозитории были добавлены."
@@ -131,10 +145,20 @@ repo6()
 echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6 x64"
 wait
 echo "Устанавливаем репозитории..."
+rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
 rpm --import https://fedoraproject.org/static/0608B895.txt
 rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+	case "$arc" in
+        32)
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
+		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+        ;;
+        64)
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+        ;;
+	esac
 rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
 br
 echo "Репозитории были добавлены."
@@ -149,11 +173,18 @@ echo "Устанавливаем репозитории..."
 rpm --import https://fedoraproject.org/static/0608B895.txt
 rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
 rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
-rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+yum -y install epel-release
 rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
-rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
 rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-rpm -ivh http://atrpms.net/ht/httptunnel-4.0.0-3_pre1.el7.centos.x86_64.rpm
+	case "$arc" in
+        32)
+		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+        ;;
+        64)
+		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+        ;;
+	esac
 br
 echo "Репозитории были добавлены."
 wait
