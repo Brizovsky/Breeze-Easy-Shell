@@ -1926,11 +1926,11 @@ myread_dig pick
 		2)
 		case "$osver1" in
 			4,5)
-			installed httpd
+			installed htpasswd
 			if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
 			;;
 			6,7)
-			installed httpd-tools
+			installed htpasswd
 			if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
 			;;
 		esac
@@ -2042,11 +2042,11 @@ END
 	br
 	case "$osver1" in
 		4,5)
-			installed httpd
+			installed htpasswd
 			if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
 		;;
 		6,7)
-			installed httpd-tools
+			installed htpasswd
 			if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
 		;;
 	esac
