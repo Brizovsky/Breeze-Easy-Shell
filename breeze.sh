@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.8.3"
+ver="v1.8.4"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -83,7 +83,7 @@ echo ""
 
 updatescript()
 {
-wget $updpath/$filename -r -N -nd
+wget $updpath/$filename -r -N -nd --no-check-certificate
 chmod 777 $filename
 }
 
