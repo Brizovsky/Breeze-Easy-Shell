@@ -1924,12 +1924,22 @@ myread_dig pick
 		br
 		;;
 		2)
-		installed httpd-tools
-		if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
+		case "$osver1" in
+			4,5)
+			installed httpd
+			if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
+			;;
+			6,7)
+			installed httpd-tools
+			if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
+			;;
+		esac
 		touch /etc/squid/internet_users #создаем файл с логинами-паролями
 		chmod 440 /etc/squid/internet_users #выставляем права на этот файл
 		chown squid:squid /etc/squid/internet_users
 		ncsa_path=$(find / -name "ncsa_auth") #определяем путь ncsa_auth
+		if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "basic_ncsa_auth"); fi #если ncsa_auth не найден, пробуем искать basic_ncsa_auth
+		if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "*ncsa_auth"); fi #если и теперь ncsa_auth не найден, пробуем искать другой ncsa_auth
 		br
 		echo "Укажите логин пользователя:"
 		read login
@@ -2030,8 +2040,16 @@ END
     ;;
     5) #Добавить пользователей Proxy
 	br
-	installed httpd-tools
-	if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
+	case "$osver1" in
+		4,5)
+			installed httpd
+			if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
+		;;
+		6,7)
+			installed httpd-tools
+			if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
+		;;
+	esac
 	br
 	echo "Укажите логин пользователя:"
 	read login
