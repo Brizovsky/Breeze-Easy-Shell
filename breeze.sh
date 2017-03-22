@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.8.4"
+ver="v1.8.5"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -412,10 +412,15 @@ hdd_total=`df | awk '(NR == 2)' | awk '{print $2}'`
 let "hdd_total_mb=$hdd_total / 1024"
 hdd_free=`df | awk '(NR == 2)' | awk '{print $4}'`
 let "hdd_free_mb=$hdd_free / 1024"
+#Определяем uptime системы (делаем это при каждом выводе)
+uptime=$(uptime)
+uptime=$(echo "${uptime%,* user*}")
+uptime=$(echo "${uptime#*up }")
 echo "HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
 echo "ОС: $osfamily $osver2"
 echo "Разрядность ОС: $arc bit"
 echo "Версия ядра Linux: $kern"
+echo "Аптайм системы: $uptime"
 echo "Ваш IP на интерфейсе $iface: $ip"
 echo "Ваш внешний IP определяется как: $ipext"
 }
@@ -475,7 +480,7 @@ let "cpu_clock=$(printf %.0f $cpu_clock)"
 cpu_cores=`grep -o "processor" <<< "$(cat /proc/cpuinfo)" | wc -l`
 cpu_model=`cat /proc/cpuinfo | grep "model name" | sed q | sed -e "s/model name//" | sed -e "s/://" | sed -e 's/^[ \t]*//' | sed -e "s/(tm)/™/g" | sed -e "s/(C)/©/g" | sed -e "s/(R)/®/g"`
 #уберём двойные пробелы:
-cpu_model=`echo $cpu_model | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g" | sed -e "s/  / /g"`
+cpu_model=`echo $cpu_model | sed -e "s/ * / /g"`
 
 #Определяем ОС
 if [ "$(cat /etc/redhat-release | awk {'print $2'})" == "release" ]
