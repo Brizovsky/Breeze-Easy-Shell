@@ -404,9 +404,9 @@ showinfo()
 echo '┌──────────────────────┐'
 echo '│ Информация о системе │'
 echo '└──────────────────────┘'
-echo "CPU: $cpu_cores x $cpu_clock MHz ($cpu_model)"
-if [ $swap_mb -eq 0 ]; then echo "RAM: $mem_mb Mb"; else
-echo "RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"; fi
+echo "                            CPU: $cpu_cores x $cpu_clock MHz ($cpu_model)"
+if [ $swap_mb -eq 0 ]; then echo "                            RAM: $mem_mb Mb"; else
+echo "                            RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"; fi
 #Определяем диск (делаем это при каждом выводе, т.к. данные меняются)
 hdd_total=`df | awk '(NR == 2)' | awk '{print $2}'`
 let "hdd_total_mb=$hdd_total / 1024"
