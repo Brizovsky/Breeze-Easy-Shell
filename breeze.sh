@@ -416,12 +416,15 @@ let "hdd_free_mb=$hdd_free / 1024"
 uptime=$(uptime)
 uptime=$(echo "${uptime%,* user*}")
 uptime=$(echo "${uptime#*up }")
-echo "HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
-echo "ОС: $osfamily $osver2"
-echo "Разрядность ОС: $arc bit"
-echo "Версия ядра Linux: $kern"
-echo "Аптайм системы: $uptime"
-echo "Ваш IP на интерфейсе $iface: $ip"
+echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
+echo "                             ОС: $osfamily $osver2"
+echo "                 Разрядность ОС: $arc bit"
+echo "              Версия ядра Linux: $kern"
+echo "                 Аптайм системы: $uptime"
+if [ ${#iface} -eq 4 ]; then #проверяем какой сетевой интерфейс. Если мы его не определили, то вообще не выводим эту строку
+echo "      Ваш IP на интерфейсе $iface: $ip"; fi #длина строки подобрана под eth0
+if [ ${#iface} -eq 8 ]; then
+echo "  Ваш IP на интерфейсе $iface: $ip"; fi #длина строки подобрана под venet0:0
 echo "Ваш внешний IP определяется как: $ipext"
 }
 
