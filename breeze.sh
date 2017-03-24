@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 6a"
+ver="v1.9 Beta 7"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -87,113 +87,109 @@ wget $updpath/$filename -r -N -nd --no-check-certificate
 chmod 777 $filename
 }
 
-undone()
-{
-echo "Данная функция в стадии разработки или отключена." #функция ставится в нереализованные пункты меню в качестве заглушки
-}
-
 settimezone()
 {
 /bin/cp /usr/share/zoneinfo/$1/$2  /etc/localtime
 echo "Новый часовой пояс установлен. Текущее время: $(date +%H:%M)."
 wait
 }
-
-repo4()
-{
-echo "Будут добавлены репозитории для CentOS 4"
-wait
-echo "Устанавливаем репозитории..."
-	case "$arc" in
-        32)
-		wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.i386.rpm
-		rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+repo () {
+	osver1_repo=$osver1 #дальше будем работать с локальной переменной
+	if [ $osver1_repo -eq 0 ]; then
+	    echo "Мы не смогли определить версию Вашей ОС, но Вы можете выбрать её сами на свой страх и риск:"
+        echo "4) CentOS 4.x (или другой дистрибутив на базе RHEL 4)"
+        echo "5) CentOS 5.x (или другой дистрибутив на базе RHEL 5)"
+        echo "6) CentOS 6.x (или другой дистрибутив на базе RHEL 6)"
+        echo "7) CentOS 7.x (или другой дистрибутив на базе RHEL 7)"
+        echo "0) Любая другая ОС"
+        myread_dig osver_user
+        if [ $osver_user -eq 0 ]; then echo "Никакие другие ОС пока не поддерживаются."
+        else
+        osver1_repo=$osver_user
+        fi
+        
+	fi
+      case "$osver1_repo" in
+        4)
+        echo "Будут добавлены репозитории для CentOS 4"
+		wait
+		echo "Устанавливаем репозитории..."
+		case "$arc" in
+			32)
+			wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+			rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+			;;
+			64)
+			wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+			rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+			;;
+		esac
         ;;
-        64)
-		wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
-		rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+        5)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
+		wait
+		echo "Устанавливаем репозитории..."
+		yum -y install epel-release
+		rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
+				;;
+				64)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
+				;;
+			esac
+		rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
         ;;
-	esac
-}
-
-repo5()
-{
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
-wait
-echo "Устанавливаем репозитории..."
-#rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
-yum -y install epel-release
-rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
-	case "$arc" in
-        32)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
+        6)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
+		wait
+		echo "Устанавливаем репозитории..."
+		yum -y install epel-release
+		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+				;;
+				64)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+				;;
+			esac
+		rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
         ;;
-        64)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
-        rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
+        7)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
+		wait
+		echo "Устанавливаем репозитории..."
+		rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+		yum -y install epel-release
+		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+		rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+				;;
+				64)
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+				;;
+			esac
         ;;
-	esac
-rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
-br
-echo "Репозитории были добавлены."
-wait
-}
-
-repo6()
-{
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
-wait
-echo "Устанавливаем репозитории..."
-#rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-#rpm --import https://fedoraproject.org/static/0608B895.txt
-yum -y install epel-release
-rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-	case "$arc" in
-        32)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+        *) #сюда мы попали только если при ручном вводе версии RHEL указали несуществующую версию
+        echo "Неправильно указана версия RHEL."
         ;;
-        64)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
-        ;;
-	esac
-rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
-br
-echo "Репозитории были добавлены."
-wait
-}
-
-repo7()
-{
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
-wait
-echo "Устанавливаем репозитории..."
-#rpm --import https://fedoraproject.org/static/0608B895.txt
-#rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
-yum -y install epel-release
-rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
-rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
-rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-	case "$arc" in
-        32)
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
-        ;;
-        64)
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
-        ;;
-	esac
-br
-echo "Репозитории были добавлены."
-wait
+      esac
+    ;;
 }
 
 iptables_save()
 {
 #проверка CentOS 7
-if [ $osver1 -eq 7 ]; then 
+if [ $osver1 -eq 7 ]; then
 	myinstall iptables-services | tee > null
 fi
 service iptables save
@@ -409,7 +405,7 @@ temp=$(echo "${temp/./}") #убрали точку
 if [ ${temp:0:1} -eq 0 ]; then temp=$(echo "${temp:1}"); fi #проверили нет ли нуля в начале, если есть - убрали
 let "power = 600000 *10000 / $temp" #сколько тестов за минуту пройдет процессор. Количество умножено на 10000, чтобы работать с 4 знаками после запятой
 let "discountpower = $power * 2394 / $cpu_clock" #сколько тестов он бы прошёл при той же частоте, что и эталонный процессор
-reference=47875
+reference=47800
 let "powerpercent = $power * 100 / $reference " #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах
 #let "discountpowerpercent = $discountpower * 100 / $reference " #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах
 #echo "$discountpowerpercent%"
@@ -877,6 +873,21 @@ myread_dig pick
     ;;
     2) #Провести тест скорости CPU
 		clear
+		installed sysbench
+		if [ $exist == false ]; then
+			echo "Сейчас будет произведена установка программы sysbench. Но для её установки нужно наличие добавленного репозитория EPEL."
+			echo "Если вы уже добавляли репозитории сами или с помощью этой программы, то от вас ничего не требуется. В противном случае, их нужно добавить."
+			echo "Добавить репозитории?"
+			myread_yn pick
+			case "$pick" in
+				y|Y)
+				repo
+				echo "Установка репозиториев завершена."
+				;;
+			esac
+			myinstall sysbench
+		fi
+		clear
 		echo "Сейчас будет произведен тест скорости процессора. Ждите..."
 		bench_cpu
 		br
@@ -898,17 +909,18 @@ myread_dig pick
     ;;
     4) #Описание теста производительности
 		clear
-echo "Для теста производительности процессора используется утилита sysbench.
-В ней используется 10000 проходов. Количество потоков устанавливается равным
-количество ядер вашего процессора (если не удалось определить количество ядер,
-используется однопоточный режим), а конечный результат сравнивается с эталонным
-процессором. За эталонный процесс были взяты виртуальные ядра хостеров Vultr и
-Digital Ocean, работающие на частоте 2,4 Ghz"
-br
-echo "Для теста скорости диска мы пытаемся записать на диск кусок в 64Кб 16 тысяч раз
-(общий объём данных 1000 Мб). Тест прогоняем трижды, показываем каждый результат
-по отдельности, а также среднее значение. Заодно вы сможете оценить насколько
-сильно \"плавает\" это значение от одного прохода к другому."
+		echo "Для теста производительности процессора используется утилита sysbench.
+		В ней используется 10000 проходов. Количество потоков устанавливается равным
+		количеству ядер вашего процессора (если не удалось определить количество ядер,
+		используется однопоточный режим), а конечный результат сравнивается с эталонным
+		процессором. За эталонный процессор были взяты виртуальные ядра хостеров Vultr и
+		Digital Ocean, работающие на частоте 2,4 Ghz"
+		br
+		echo "Для теста скорости диска мы пытаемся записать на диск кусок в 64Кб 16 тысяч раз
+		(общий объём данных 1000 Мб). Тест прогоняем трижды, показываем каждый результат
+		по отдельности, а также среднее значение. Заодно вы сможете оценить насколько
+		сильно \"плавает\" это значение от одного прохода к другому."
+		br
 		wait
     ;;
     0)
@@ -928,48 +940,11 @@ pick=$chosen2
 fi
     case "$pick" in
     1) #Добавить внешние репозитории
-      case "$osver1" in
-        4)
-        repo4
-        ;;
-        5)
-        repo5
-        ;;
-        6)
-        repo6
-        ;;
-        7)
-        repo7
-        ;;
-        0)
-        echo "Мы не смогли определить версию Вашей ОС, но Вы можете выбрать её сами на свой страх и риск:"
-        echo "5) CentOS 5.x x64 (или другой дистрибутив на базе RHEL 5)"
-        echo "6) CentOS 6.x x64 (или другой дистрибутив на базе RHEL 6)"
-        echo "7) CentOS 7.x x64 (или другой дистрибутив на базе RHEL 7)"
-        echo "0) Любая другая ОС"
-        myread_dig osver_user
-        case "$osver_user" in
-          5)
-          repo5
-          ;;
-          6)
-          repo6
-          ;;
-          7)
-          repo7
-          ;;
-          0)
-          echo "Никакие другие ОС пока не поддерживаются. Но планируется расширение поддержки"
-          wait
-          ;;
-        esac
-        ;;
-        *) #по идее мы НИКОГДА не должны попасть сюда, исходя из того, как строится проверка
-        echo "Произошла непредвиденная ошибка при определении версии CentOS. Выходим."
-        exit 0
-        ;;
-      esac   
-    ;;
+      repo
+	  br
+	  echo "Установка репозиториев завершена."
+	  br
+	  wait
     2) #Обновить ОС
     echo "Начинаем обновление ОС..."
     yum update -y
@@ -1859,7 +1834,7 @@ myread_dig pick
       echo 'Неправильный выбор. Выходим.'
       wait
       ;;
-    esac    
+    esac
     ;;
     0)
     chosen=0
@@ -2180,7 +2155,7 @@ END
 		echo 'Squid был удален'
 		wait
 		;;
-	esac    
+	esac
     ;;
     3) #Поменять MTU для интерфейса
     echo 'На каком интерфейсе вы хотите поменять mtu?'
