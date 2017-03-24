@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta1"
+ver="v1.9 Beta 2"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -795,7 +795,7 @@ fi
 		wait
     ;;
     0)
-     chosen2=0
+     chosen=0
     ;;
     esac
 ;;
