@@ -459,7 +459,7 @@ bench_hdd () {
         ioall=$( awk 'BEGIN{print '$ioraw' + '$ioraw2' + '$ioraw3'}' )
         ioavg=$( awk 'BEGIN{print '$ioall'/3}' )
         
-        echo "Среднее значение: $ioavg MB/s""
+        echo "Среднее значение: $ioavg MB/s"
 }
 
 
