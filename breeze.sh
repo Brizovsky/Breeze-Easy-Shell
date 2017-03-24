@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 7"
+ver="v1.9 Beta 7a"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -183,7 +183,6 @@ repo () {
         echo "Неправильно указана версия RHEL."
         ;;
       esac
-    ;;
 }
 
 iptables_save()
