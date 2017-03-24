@@ -108,7 +108,80 @@ repo () {
 			osver1_repo=$osver_user
         fi
 	fi
-
+      case "$osver1_repo" in
+        4)
+        echo "Будут добавлены репозитории для CentOS 4"
+		wait
+		echo "Устанавливаем репозитории..."
+		case "$arc" in
+			32)
+			wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+			rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+			;;
+			64)
+			wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+			rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+			;;
+		esac
+        ;;
+        5)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
+		wait
+		echo "Устанавливаем репозитории..."
+		yum -y install epel-release
+		rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
+				;;
+				64)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
+				;;
+			esac
+		rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
+        ;;
+        6)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
+		wait
+		echo "Устанавливаем репозитории..."
+		yum -y install epel-release
+		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+				;;
+				64)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+				;;
+			esac
+		rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
+        ;;
+        7)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
+		wait
+		echo "Устанавливаем репозитории..."
+		rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+		yum -y install epel-release
+		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+		rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+				;;
+				64)
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+				;;
+			esac
+        ;;
+        *) #сюда мы попали только если при ручном вводе версии RHEL указали несуществующую версию
+        echo "Неправильно указана версия RHEL."
+        ;;
+      esac
 }
 
 iptables_save()
@@ -870,6 +943,7 @@ fi
 	  echo "Установка репозиториев завершена."
 	  br
 	  wait
+	;;
     2) #Обновить ОС
     echo "Начинаем обновление ОС..."
     yum update -y
