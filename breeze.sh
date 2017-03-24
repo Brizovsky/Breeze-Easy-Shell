@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 3a"
+ver="v1.9 Beta 4"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -399,6 +399,70 @@ case "$ans" in
 esac
 }
 
+bench_hdd () {
+        # Measuring disk speed with DD
+        io=$( ( dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+        echo "   Первый прогон: $io"
+        io2=$( ( dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+        echo "   Второй прогон: $io2"
+        io3=$( ( dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+        echo "   Третий прогон: $io3"
+        # Calculating avg I/O (better approach with awk for non int values)
+        if [ $(echo $io | awk '{print $2}') = "GB/s" ] #проверили а не гигабайты ли это
+        then #гигабайты
+        ioraw=$( echo $io | awk 'NR==1 {print $1}' ) #взяли только число
+        gb=$(echo $ioraw |  sed 's/\./ /' | awk '{print $1}') #взяли кол-во гигабайт
+        mb=$(echo $ioraw |  sed 's/\./ /' | awk '{print $2}') #взяли кол-во мегабайт
+        if [ ${#mb} -eq 1 ]; then let "mb=$mb*1024/10"; else #переводим десятые доли гигабайт в мегабайты
+          if [ ${#mb} -eq 2 ]; then let "mb=$mb*1024/100"; else #переводим сотвые долги гигабайт в мегабайты
+            if [ ${#mb} -eq 3 ]; then let "mb=$mb*1024/1000"; else #переводим тысячные долги гигабайт в мегабайты
+            mb=0
+            fi   
+          fi
+        fi
+        let "ioraw=$gb*1024+$mb"
+        else ioraw=$( echo $io | awk 'NR==1 {print $1}' )           
+        fi
+
+        if [ $(echo $io2 | awk '{print $2}') = "GB/s" ] #проверили а не гигабайты ли это
+        then #гигабайты
+        ioraw2=$( echo $io2 | awk 'NR==1 {print $1}' ) #взяли только число
+        gb=$(echo $ioraw2 |  sed 's/\./ /' | awk '{print $1}') #взяли кол-во гигабайт
+        mb=$(echo $ioraw2 |  sed 's/\./ /' | awk '{print $2}') #взяли кол-во мегабайт
+        if [ ${#mb} -eq 1 ]; then let "mb=$mb*1024/10"; else #переводим десятые доли гигабайт в мегабайты
+          if [ ${#mb} -eq 2 ]; then let "mb=$mb*1024/100"; else #переводим сотвые долги гигабайт в мегабайты
+            if [ ${#mb} -eq 3 ]; then let "mb=$mb*1024/1000"; else #переводим тысячные долги гигабайт в мегабайты
+            mb=0
+            fi   
+          fi
+        fi
+        let "ioraw2=$gb*1024+$mb"
+        else ioraw2=$( echo $io2 | awk 'NR==1 {print $1}' )           
+        fi
+
+        if [ $(echo $io3 | awk '{print $2}') = "GB/s" ] #проверили а не гигабайты ли это
+        then #гигабайты
+        ioraw3=$( echo $io3 | awk 'NR==1 {print $1}' ) #взяли только число
+        gb=$(echo $ioraw3 |  sed 's/\./ /' | awk '{print $1}') #взяли кол-во гигабайт
+        mb=$(echo $ioraw3 |  sed 's/\./ /' | awk '{print $2}') #взяли кол-во мегабайт
+        if [ ${#mb} -eq 1 ]; then let "mb=$mb*1024/10"; else #переводим десятые доли гигабайт в мегабайты
+          if [ ${#mb} -eq 2 ]; then let "mb=$mb*1024/100"; else #переводим сотвые долги гигабайт в мегабайты
+            if [ ${#mb} -eq 3 ]; then let "mb=$mb*1024/1000"; else #переводим тысячные долги гигабайт в мегабайты
+            mb=0
+            fi   
+          fi
+        fi
+        let "ioraw3=$gb*1024+$mb"
+        else ioraw3=$( echo $io3 | awk 'NR==1 {print $1}' )           
+        fi
+
+        ioall=$( awk 'BEGIN{print '$ioraw' + '$ioraw2' + '$ioraw3'}' )
+        ioavg=$( awk 'BEGIN{print '$ioall'/3}' )
+        
+        echo "Среднее значение: $ioavg MB/s""
+}
+
+
 showinfo()
 {
 echo '┌──────────────────────────────────────────────────────────────┐'
@@ -795,7 +859,11 @@ myread_dig pick
 		wait
     ;;
     3) #Провести тест скорости диска
-		echo "Провели тест диска"
+		clear
+		echo "Сейчас будет произведен тест скорости диска. На медленных дисках это может занять продолжительное время. Пожалуйста, ожидайте."
+		bench_hdd
+		br
+		echo "Тест завершен"
 		wait
     ;;
     4) #Описание теста производительности
