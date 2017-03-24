@@ -468,8 +468,8 @@ space2=""
       done
 
 filename='breeze.sh'
-#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master/' #релиз
-updpath='https://github.com/Brizovsky/Breeze-Easy-Shell/blob/beta' #бета
+#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master' #релиз
+updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
 
 #определяем сколько RAM
 mem_total=`cat /proc/meminfo | grep MemTotal | awk '{print $2}'`
