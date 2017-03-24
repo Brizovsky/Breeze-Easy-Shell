@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 7a"
+ver="v1.9 Beta 8"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
