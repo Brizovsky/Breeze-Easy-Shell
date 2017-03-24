@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 3"
+ver="v1.9 Beta 3a"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -792,12 +792,15 @@ myread_dig pick
     ;;
     2) #Провести тест скорости CPU
 		echo "Провели тест cpu"
+		wait
     ;;
     3) #Провести тест скорости диска
 		echo "Провели тест диска"
+		wait
     ;;
     4) #Описание теста производительности
 		echo "Здесь будет описание бенчмарка"
+		wait
     ;;
     0)
      chosen=0
