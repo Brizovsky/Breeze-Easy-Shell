@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 10"
+ver="v1.9 Beta 11"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -855,6 +855,7 @@ echo "$menu1"
 myread_dig pick
     case "$pick" in
     1) #Показать общую информацию о системе
+		clear
 		showinfo
 		br
 		echo "Вычисляем Ваш IP на интерфейсе..."
