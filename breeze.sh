@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 14"
+ver="v1.9 Beta 14a"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -863,11 +863,13 @@ myread_dig pick
 		br
 		echo "Вычисляем Ваш IP на интерфейсе..."
 		whatismyip
+		wait #отладка
 		clear
 		showinfo
 		br
 		echo "Вычисляем Ваш внешний IP..."
 		whatismyipext
+		wait #отладка
 		clear
 		showinfo
 		br
