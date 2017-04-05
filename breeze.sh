@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 13b"
+ver="v1.9 Beta 14"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -314,7 +314,7 @@ fi
 whatismyiface()
 {
 if [ $osver1 -eq 7 ]; then
-  installed ifconfig force
+  installed net-tools
   if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
