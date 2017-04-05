@@ -267,10 +267,13 @@ wait
 #Функция проверки установленного приложения, exist возвращает true если установлена и false, если нет.
 installed()
 {
-exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
-if [ -z $exist ]
-	then #будем использовать оба варианта
-	exist=`rpm -qa $1` #вариант медленнее, но эффективнее
+if [ $2 = "force" ]; then exist=`rpm -qa $1`; #добавили возможности форсированно использовать длинный вариант проверки
+else #если нет ключа force, используем старый двойной вариант
+	exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
+	if [ -z $exist ]
+		then #будем использовать оба варианта
+		exist=`rpm -qa $1` #вариант медленнее, но эффективнее
+	fi
 fi
 
 if [ -n "$exist" ]
@@ -309,7 +312,7 @@ fi
 whatismyiface()
 {
 if [ $osver1 -eq 7 ]; then
-  installed ifconfig
+  installed ifconfig force
   if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
@@ -327,7 +330,7 @@ case "$osver1" in
 ip=`ifconfig $iface | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
 ;;
 7)
-installed ifconfig
+installed ifconfig force
 if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
 ip=`ifconfig $iface | grep 'inet' | sed q | awk {'print $2'}`
 ;;
