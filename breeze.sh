@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 12a"
+ver="v1.9 Beta 13"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -267,7 +267,7 @@ wait
 #Функция проверки установленного приложения, exist возвращает true если установлена и false, если нет.
 installed()
 {
-if [ $2 = "force" ]; then exist=`rpm -qa $1` #добавили возможности форсированно использовать длинный вариант проверки
+if [ "$2" == "force" ]; then exist=`rpm -qa $1` #добавили возможности форсированно использовать длинный вариант проверки
 echo "test test test test test"
 else #если нет ключа force, используем старый двойной вариант
 	exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
@@ -331,8 +331,6 @@ case "$osver1" in
 ip=`ifconfig $iface | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
 ;;
 7)
-installed ifconfig force
-if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
 ip=`ifconfig $iface | grep 'inet' | sed q | awk {'print $2'}`
 ;;
 *)
@@ -515,7 +513,7 @@ about()
 {
 echo "Данную утилиту написал Павел Евтихов (aka Brizovsky).
 г. Екатеринбург, Россия.
-2016 год.
+2016-2017 год.
 "
 }
 changelog()
