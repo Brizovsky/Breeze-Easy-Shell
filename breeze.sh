@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 14a"
+ver="v1.9 Beta 15"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -282,8 +282,6 @@ exist=true
 else
 exist=false
 fi
-
-echo "exist=$exist" #отладка
 }
 
 #функция которая открывает на редактирование файл в приоритете: mc, nano, vi
@@ -495,7 +493,7 @@ let "hdd_total_mb=$hdd_total / 1024"
 hdd_free=`df | awk '(NR == 2)' | awk '{print $4}'`
 let "hdd_free_mb=$hdd_free / 1024"
 #Определяем uptime системы (делаем это при каждом выводе)
-uptime=$(uptime)
+uptime=$(uptime | sed -e "s/ * / /g") #сразу берем аптайм без двойных пробелов
 uptime=$(echo "${uptime%,* user*}")
 uptime=$(echo "${uptime#*up }")
 echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
@@ -863,13 +861,11 @@ myread_dig pick
 		br
 		echo "Вычисляем Ваш IP на интерфейсе..."
 		whatismyip
-		wait #отладка
 		clear
 		showinfo
 		br
 		echo "Вычисляем Ваш внешний IP..."
 		whatismyipext
-		wait #отладка
 		clear
 		showinfo
 		br
