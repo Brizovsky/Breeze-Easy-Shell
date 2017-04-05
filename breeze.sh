@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 13"
+ver="v1.9 Beta 13a"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -268,7 +268,6 @@ wait
 installed()
 {
 if [ "$2" == "force" ]; then exist=`rpm -qa $1` #добавили возможности форсированно использовать длинный вариант проверки
-echo "test test test test test"
 else #если нет ключа force, используем старый двойной вариант
 	exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
 	if [ -z $exist ]
@@ -283,6 +282,8 @@ exist=true
 else
 exist=false
 fi
+
+echo "exist=$exist" #отладка
 }
 
 #функция которая открывает на редактирование файл в приоритете: mc, nano, vi
