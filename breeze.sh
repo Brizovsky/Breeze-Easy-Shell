@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 16"
+ver="v1.9 Beta 17"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -397,7 +397,8 @@ bench_cpu () {
 threads=$cpu_cores #делаем кол-во потоков, равное кол-ву ядер
 if [ -z $threads ]; then threads=1; fi #если по какой-то причине мы не знаем сколько ядер, ставим в один поток
 if [ -z $cpu_clock ]; then cpu_clock=2394; fi #если по какой-то причине мы не знаем сколько ядер, ставим в один поток
-totaltime=$(sysbench --test=cpu --cpu-max-prime=10000 run  --num-threads=$threads | grep "total time:" | awk {'print $3'})
+#totaltime=$(sysbench --test=cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "total time:" | awk {'print $3'}) #старая версия
+totaltime=$(sysbench -cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "total time:" | awk {'print $3'}) #новая версия
 temp=$(echo "${totaltime%*s}") #убрали в конце "s"
 temp=$(echo "${temp/./}") #убрали точку
 if [ ${temp:0:1} -eq 0 ]; then temp=$(echo "${temp:1}"); fi #проверили нет ли нуля в начале, если есть - убрали
