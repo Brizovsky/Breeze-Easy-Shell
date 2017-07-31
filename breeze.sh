@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9 Beta 17"
+ver="v1.9"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -548,8 +548,8 @@ space2=""
       done
 
 filename='breeze.sh'
-#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master' #релиз
-updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
+updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master' #релиз
+#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
 
 #определяем сколько RAM
 mem_total=`cat /proc/meminfo | grep MemTotal | awk '{print $2}'`
