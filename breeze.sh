@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.8.5"
+ver="v1.9"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -18,7 +18,7 @@ eval $1=$temp
 echo
 }
 
-#функция, которая запрашивает только да или нет.
+#функция, которая запрашивает только да или нет
 myread_yn()
 {
 temp=""
@@ -87,113 +87,107 @@ wget $updpath/$filename -r -N -nd --no-check-certificate
 chmod 777 $filename
 }
 
-undone()
-{
-echo "Данная функция в стадии разработки или отключена." #функция ставится в нереализованные пункты меню в качестве заглушки
-}
-
 settimezone()
 {
 /bin/cp /usr/share/zoneinfo/$1/$2  /etc/localtime
 echo "Новый часовой пояс установлен. Текущее время: $(date +%H:%M)."
 wait
 }
-
-repo4()
-{
-echo "Будут добавлены репозитории для CentOS 4"
-wait
-echo "Устанавливаем репозитории..."
-	case "$arc" in
-        32)
-		wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.i386.rpm
-		rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+repo () {
+	osver1_repo=$osver1 #дальше будем работать с локальной переменной
+	if [ $osver1_repo -eq 0 ]; then
+	    echo "Мы не смогли определить версию Вашей ОС, но Вы можете выбрать её сами на свой страх и риск:"
+        echo "4) CentOS 4.x (или другой дистрибутив на базе RHEL 4)"
+        echo "5) CentOS 5.x (или другой дистрибутив на базе RHEL 5)"
+        echo "6) CentOS 6.x (или другой дистрибутив на базе RHEL 6)"
+        echo "7) CentOS 7.x (или другой дистрибутив на базе RHEL 7)"
+        echo "0) Любая другая ОС"
+        myread_dig osver_user
+        if [ $osver_user -eq 0 ]; then echo "Никакие другие ОС пока не поддерживаются."
+			else
+			osver1_repo=$osver_user
+        fi
+	fi
+      case "$osver1_repo" in
+        4)
+        echo "Будут добавлены репозитории для CentOS 4"
+		wait
+		echo "Устанавливаем репозитории..."
+		case "$arc" in
+			32)
+			wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+			rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.i386.rpm
+			;;
+			64)
+			wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+			rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+			;;
+		esac
         ;;
-        64)
-		wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
-		rpm -Uvh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
+        5)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
+		wait
+		echo "Устанавливаем репозитории..."
+		yum -y install epel-release
+		rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
+				;;
+				64)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
+				;;
+			esac
+		rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
         ;;
-	esac
-}
-
-repo5()
-{
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
-wait
-echo "Устанавливаем репозитории..."
-#rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
-yum -y install epel-release
-rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
-	case "$arc" in
-        32)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
+        6)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
+		wait
+		echo "Устанавливаем репозитории..."
+		yum -y install epel-release
+		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+				;;
+				64)
+				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+				;;
+			esac
+		rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
         ;;
-        64)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
-        rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
+        7)
+		echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
+		wait
+		echo "Устанавливаем репозитории..."
+		rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+		yum -y install epel-release
+		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+		rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+			case "$arc" in
+				32)
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+				;;
+				64)
+				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
+				;;
+			esac
         ;;
-	esac
-rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
-br
-echo "Репозитории были добавлены."
-wait
-}
-
-repo6()
-{
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
-wait
-echo "Устанавливаем репозитории..."
-#rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-#rpm --import https://fedoraproject.org/static/0608B895.txt
-yum -y install epel-release
-rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-	case "$arc" in
-        32)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
+        *) #сюда мы попали только если при ручном вводе версии RHEL указали несуществующую версию
+        echo "Неправильно указана версия RHEL."
         ;;
-        64)
-		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
-        ;;
-	esac
-rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
-br
-echo "Репозитории были добавлены."
-wait
-}
-
-repo7()
-{
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
-wait
-echo "Устанавливаем репозитории..."
-#rpm --import https://fedoraproject.org/static/0608B895.txt
-#rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
-yum -y install epel-release
-rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
-rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
-rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-	case "$arc" in
-        32)
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
-        ;;
-        64)
-		rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
-        ;;
-	esac
-br
-echo "Репозитории были добавлены."
-wait
+      esac
 }
 
 iptables_save()
 {
 #проверка CentOS 7
-if [ $osver1 -eq 7 ]; then 
+if [ $osver1 -eq 7 ]; then
 	myinstall iptables-services | tee > null
 fi
 service iptables save
@@ -268,15 +262,17 @@ wait
 mtu_change()
 {
 ifconfig $1 mtu $2
-wait
 }
 #Функция проверки установленного приложения, exist возвращает true если установлена и false, если нет.
 installed()
 {
-exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
-if [ -z $exist ]
-	then #будем использовать оба варианта
-	exist=`rpm -qa $1` #вариант медленнее, но эффективнее
+if [ "$2" == "force" ]; then exist=`rpm -qa $1` #добавили возможности форсированно использовать длинный вариант проверки
+else #если нет ключа force, используем старый двойной вариант
+	exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
+	if [ -z $exist ]
+		then #будем использовать оба варианта
+		exist=`rpm -qa $1` #вариант медленнее, но эффективнее
+	fi
 fi
 
 if [ -n "$exist" ]
@@ -315,7 +311,7 @@ fi
 whatismyiface()
 {
 if [ $osver1 -eq 7 ]; then
-  installed ifconfig
+  installed net-tools
   if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
@@ -333,8 +329,6 @@ case "$osver1" in
 ip=`ifconfig $iface | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
 ;;
 7)
-installed ifconfig
-if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
 ip=`ifconfig $iface | grep 'inet' | sed q | awk {'print $2'}`
 ;;
 *)
@@ -399,6 +393,92 @@ case "$ans" in
 esac
 }
 
+bench_cpu () {
+threads=$cpu_cores #делаем кол-во потоков, равное кол-ву ядер
+if [ -z $threads ]; then threads=1; fi #если по какой-то причине мы не знаем сколько ядер, ставим в один поток
+if [ -z $cpu_clock ]; then cpu_clock=2394; fi #если по какой-то причине мы не знаем сколько ядер, ставим в один поток
+#totaltime=$(sysbench --test=cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "total time:" | awk {'print $3'}) #старая версия
+totaltime=$(sysbench -cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "total time:" | awk {'print $3'}) #новая версия
+temp=$(echo "${totaltime%*s}") #убрали в конце "s"
+temp=$(echo "${temp/./}") #убрали точку
+if [ ${temp:0:1} -eq 0 ]; then temp=$(echo "${temp:1}"); fi #проверили нет ли нуля в начале, если есть - убрали
+let "power = 600000 *10000 / $temp" #сколько тестов за минуту пройдет процессор. Количество умножено на 10000, чтобы работать с 4 знаками после запятой
+let "discountpower = $power * 2394 / $cpu_clock" #сколько тестов он бы прошёл при той же частоте, что и эталонный процессор
+reference=47800
+let "powerpercent = $power * 100 / $reference " #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах
+#let "discountpowerpercent = $discountpower * 100 / $reference " #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах
+#echo "$discountpowerpercent%"
+if [ $threads -gt 1 ]; then #если ядер больше одного, посчитаем еще относительную мощность одного ядра к эталону
+let "powerpercore= $power / $threads" #сколько тестов он проходит в минуту в пересчете на одно ядро
+let "powerpercorepercent = $powerpercore * 100 / $reference " #мощность одного ядра этого процессора к мощности эталонного процессора
+fi
+}
+
+
+bench_hdd () {
+        # Measuring disk speed with DD
+        io=$( ( dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+        echo "   Первый прогон: $io"
+        io2=$( ( dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+        echo "   Второй прогон: $io2"
+        io3=$( ( dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$ ) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+        echo "   Третий прогон: $io3"
+        # Calculating avg I/O (better approach with awk for non int values)
+        if [ $(echo $io | awk '{print $2}') = "GB/s" ] #проверили а не гигабайты ли это
+        then #гигабайты
+        ioraw=$( echo $io | awk 'NR==1 {print $1}' ) #взяли только число
+        gb=$(echo $ioraw |  sed 's/\./ /' | awk '{print $1}') #взяли кол-во гигабайт
+        mb=$(echo $ioraw |  sed 's/\./ /' | awk '{print $2}') #взяли кол-во мегабайт
+        if [ ${#mb} -eq 1 ]; then let "mb=$mb*1024/10"; else #переводим десятые доли гигабайт в мегабайты
+          if [ ${#mb} -eq 2 ]; then let "mb=$mb*1024/100"; else #переводим сотвые долги гигабайт в мегабайты
+            if [ ${#mb} -eq 3 ]; then let "mb=$mb*1024/1000"; else #переводим тысячные долги гигабайт в мегабайты
+            mb=0
+            fi   
+          fi
+        fi
+        let "ioraw=$gb*1024+$mb"
+        else ioraw=$( echo $io | awk 'NR==1 {print $1}' )           
+        fi
+
+        if [ $(echo $io2 | awk '{print $2}') = "GB/s" ] #проверили а не гигабайты ли это
+        then #гигабайты
+        ioraw2=$( echo $io2 | awk 'NR==1 {print $1}' ) #взяли только число
+        gb=$(echo $ioraw2 |  sed 's/\./ /' | awk '{print $1}') #взяли кол-во гигабайт
+        mb=$(echo $ioraw2 |  sed 's/\./ /' | awk '{print $2}') #взяли кол-во мегабайт
+        if [ ${#mb} -eq 1 ]; then let "mb=$mb*1024/10"; else #переводим десятые доли гигабайт в мегабайты
+          if [ ${#mb} -eq 2 ]; then let "mb=$mb*1024/100"; else #переводим сотвые долги гигабайт в мегабайты
+            if [ ${#mb} -eq 3 ]; then let "mb=$mb*1024/1000"; else #переводим тысячные долги гигабайт в мегабайты
+            mb=0
+            fi   
+          fi
+        fi
+        let "ioraw2=$gb*1024+$mb"
+        else ioraw2=$( echo $io2 | awk 'NR==1 {print $1}' )           
+        fi
+
+        if [ $(echo $io3 | awk '{print $2}') = "GB/s" ] #проверили а не гигабайты ли это
+        then #гигабайты
+        ioraw3=$( echo $io3 | awk 'NR==1 {print $1}' ) #взяли только число
+        gb=$(echo $ioraw3 |  sed 's/\./ /' | awk '{print $1}') #взяли кол-во гигабайт
+        mb=$(echo $ioraw3 |  sed 's/\./ /' | awk '{print $2}') #взяли кол-во мегабайт
+        if [ ${#mb} -eq 1 ]; then let "mb=$mb*1024/10"; else #переводим десятые доли гигабайт в мегабайты
+          if [ ${#mb} -eq 2 ]; then let "mb=$mb*1024/100"; else #переводим сотвые долги гигабайт в мегабайты
+            if [ ${#mb} -eq 3 ]; then let "mb=$mb*1024/1000"; else #переводим тысячные долги гигабайт в мегабайты
+            mb=0
+            fi   
+          fi
+        fi
+        let "ioraw3=$gb*1024+$mb"
+        else ioraw3=$( echo $io3 | awk 'NR==1 {print $1}' )           
+        fi
+
+        ioall=$( awk 'BEGIN{print '$ioraw' + '$ioraw2' + '$ioraw3'}' )
+        ioavg=$( awk 'BEGIN{print '$ioall'/3}' )
+        
+        echo "Среднее значение: $ioavg MB/s"
+}
+
+
 showinfo()
 {
 echo '┌──────────────────────────────────────────────────────────────┐'
@@ -413,7 +493,7 @@ let "hdd_total_mb=$hdd_total / 1024"
 hdd_free=`df | awk '(NR == 2)' | awk '{print $4}'`
 let "hdd_free_mb=$hdd_free / 1024"
 #Определяем uptime системы (делаем это при каждом выводе)
-uptime=$(uptime)
+uptime=$(uptime | sed -e "s/ * / /g") #сразу берем аптайм без двойных пробелов
 uptime=$(echo "${uptime%,* user*}")
 uptime=$(echo "${uptime#*up }")
 echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
@@ -432,7 +512,7 @@ about()
 {
 echo "Данную утилиту написал Павел Евтихов (aka Brizovsky).
 г. Екатеринбург, Россия.
-2016 год.
+2016-2017 год.
 "
 }
 changelog()
@@ -468,7 +548,8 @@ space2=""
       done
 
 filename='breeze.sh'
-updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master/'
+updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master' #релиз
+#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
 
 #определяем сколько RAM
 mem_total=`cat /proc/meminfo | grep MemTotal | awk '{print $2}'`
@@ -534,6 +615,21 @@ menu="
 ├───┼─────────────────────────────────────────┤
 │ 0 │ Выход                                   │
 └───┴─────────────────────────────────────────┘
+"
+menu1="
+● Информация о системе:
+│
+│ ┌───┬──────────────────────────────────────┐
+├─┤ 1 │ Показать общую информацию о системе  │
+│ ├───┼──────────────────────────────────────┤
+├─┤ 2 │ Провести тест скорости CPU           │
+│ ├───┼──────────────────────────────────────┤
+├─┤ 3 │ Провести тест скорости диска         │
+│ ├───┼──────────────────────────────────────┤
+├─┤ 4 │ Описание теста производительности    │
+│ ├───┼──────────────────────────────────────┤
+└─┤ 0 │ Выйти на уровень вверх               │
+  └───┴──────────────────────────────────────┘
 "
 menu2="
 ● Работа с ОС:
@@ -721,17 +817,17 @@ menu6="
 menu7="
 ● Очистка системы:
 │
-│ ┌───┬──────────────────────────────────────────────┐
-├─┤ 1 │ Удалить старые установочные пакеты (кэш yum) │
-│ ├───┼──────────────────────────────────────────────┤
-├─┤ 2 │ Удалить логи Apache, Nginx                   │
-│ ├───┼──────────────────────────────────────────────┤
-├─┤ 3 │ Удалить логи Apache конкретного пользователя │
-│ ├───┼──────────────────────────────────────────────┤
-├─┤ 4 │ Посмотреть сколько свободного места на диске │
-│ ├───┼──────────────────────────────────────────────┤
-└─┤ 0 │ Выйти на уровень вверх                       │
-  └───┴──────────────────────────────────────────────┘
+│ ┌───┬─────────────────────────────────────────────────┐
+├─┤ 1 │ Удалить старые установочные пакеты (кэш yum)    │
+│ ├───┼─────────────────────────────────────────────────┤
+├─┤ 2 │ Удалить логи Apache, Nginx, Squid и прочие логи │
+│ ├───┼─────────────────────────────────────────────────┤
+├─┤ 3 │ Удалить логи Apache конкретного пользователя    │
+│ ├───┼─────────────────────────────────────────────────┤
+├─┤ 4 │ Посмотреть сколько свободного места на диске    │
+│ ├───┼─────────────────────────────────────────────────┤
+└─┤ 0 │ Выйти на уровень вверх                          │
+  └───┴─────────────────────────────────────────────────┘
 "
 
 #-----------------
@@ -753,20 +849,84 @@ fi
 
 case "$pick" in
 1) #Информация о системе
+chosen=1
 clear
-showinfo
-br
-echo "Вычисляем Ваш IP на интерфейсе..."
-whatismyip
-clear
-showinfo
-br
-echo "Вычисляем Ваш внешний IP..."
-whatismyipext
-clear
-showinfo
-br
-wait
+echo "$title"
+echo "$menu1"
+myread_dig pick
+    case "$pick" in
+    1) #Показать общую информацию о системе
+		clear
+		showinfo
+		br
+		echo "Вычисляем Ваш IP на интерфейсе..."
+		whatismyip
+		clear
+		showinfo
+		br
+		echo "Вычисляем Ваш внешний IP..."
+		whatismyipext
+		clear
+		showinfo
+		br
+		wait
+    ;;
+    2) #Провести тест скорости CPU
+		clear
+		installed sysbench
+		if [ $exist == false ]; then
+			echo "Сейчас будет произведена установка программы sysbench. Но для её установки нужно наличие добавленного репозитория EPEL."
+			echo "Если вы уже добавляли репозитории сами или с помощью этой программы, то от вас ничего не требуется. В противном случае, их нужно добавить."
+			echo "Добавить репозитории?"
+			myread_yn pick
+			case "$pick" in
+				y|Y)
+				repo
+				echo "Установка репозиториев завершена."
+				;;
+			esac
+			myinstall sysbench
+		fi
+		clear
+		echo "Сейчас будет произведен тест скорости процессора. Ждите..."
+		bench_cpu
+		br
+		echo "Ваш процессор выполнил вычисления за $totaltime"
+		echo "Мощность вашего процессора соответствует $powerpercent% от эталонного одноядерного процессора."
+		if [ $cpu_cores -gt 1 ]; then echo "В пересчете на одно ядро мощность вашего процессора составляет $powerpercorepercent% от эталонного."; fi #пересчет на 1 ядро выводим только если ядер больше одного
+		br
+		wait
+    ;;
+    3) #Провести тест скорости диска
+		clear
+		echo "Сейчас будет произведен тест скорости диска. Ждите..."
+		br
+		bench_hdd
+		br
+		echo "Тест завершен."
+		br
+		wait
+    ;;
+    4) #Описание теста производительности
+		clear
+		echo "Для теста производительности процессора используется утилита sysbench."
+		echo "В ней используется 10000 проходов. Количество потоков устанавливается равным"
+		echo "количеству ядер вашего процессора (если не удалось определить количество ядер,"
+		echo "используется однопоточный режим), а конечный результат сравнивается с эталонным"
+		echo "процессором. За эталонный процессор были взяты виртуальные ядра хостеров Vultr и"
+		echo "Digital Ocean, работающие на частоте 2,4 Ghz"
+		br
+		echo "Для теста скорости диска мы пытаемся записать на диск кусок в 64Кб 16 тысяч раз"
+		echo "(общий объём данных 1000 Мб). Тест прогоняем трижды, показываем каждый результат"
+		echo "по отдельности, а также среднее значение. Заодно вы сможете оценить насколько"
+		echo "сильно \"плавает\" это значение от одного прохода к другому."
+		br
+		wait
+    ;;
+    0)
+     chosen=0
+    ;;
+    esac
 ;;
 2) #Работа с ОС
 chosen=2
@@ -780,48 +940,12 @@ pick=$chosen2
 fi
     case "$pick" in
     1) #Добавить внешние репозитории
-      case "$osver1" in
-        4)
-        repo4
-        ;;
-        5)
-        repo5
-        ;;
-        6)
-        repo6
-        ;;
-        7)
-        repo7
-        ;;
-        0)
-        echo "Мы не смогли определить версию Вашей ОС, но Вы можете выбрать её сами на свой страх и риск:"
-        echo "5) CentOS 5.x x64 (или другой дистрибутив на базе RHEL 5)"
-        echo "6) CentOS 6.x x64 (или другой дистрибутив на базе RHEL 6)"
-        echo "7) CentOS 7.x x64 (или другой дистрибутив на базе RHEL 7)"
-        echo "0) Любая другая ОС"
-        myread_dig osver_user
-        case "$osver_user" in
-          5)
-          repo5
-          ;;
-          6)
-          repo6
-          ;;
-          7)
-          repo7
-          ;;
-          0)
-          echo "Никакие другие ОС пока не поддерживаются. Но планируется расширение поддержки"
-          wait
-          ;;
-        esac
-        ;;
-        *) #по идее мы НИКОГДА не должны попасть сюда, исходя из того, как строится проверка
-        echo "Произошла непредвиденная ошибка при определении версии CentOS. Выходим."
-        exit 0
-        ;;
-      esac   
-    ;;
+      repo
+	  br
+	  echo "Установка репозиториев завершена."
+	  br
+	  wait
+	;;
     2) #Обновить ОС
     echo "Начинаем обновление ОС..."
     yum update -y
@@ -1711,7 +1835,7 @@ myread_dig pick
       echo 'Неправильный выбор. Выходим.'
       wait
       ;;
-    esac    
+    esac
     ;;
     0)
     chosen=0
@@ -2032,10 +2156,10 @@ END
 		echo 'Squid был удален'
 		wait
 		;;
-	esac    
+	esac
     ;;
     3) #Поменять MTU для интерфейса
-    echo 'На каком интерфейсе вы хотите поменять mtu?'
+    echo 'На каком интерфейсе вы хотите поменять mtu? (обычно на VPS это venet0:0 или eth0)'
     read interface
     echo 'Какой mtu установить?'
     read mtu
@@ -2156,18 +2280,29 @@ myread_dig pick
     echo "Готово."
     wait
     ;;
-    2) #Удалить логи Apache, Nginx
+    2) #Удалить логи Apache, Nginx, Squid и прочие логи
     echo "Внимание! Будут удалены все архивные логи Apache и NginX, кроме сегодняшних."
+    echo "А также будут удалены все логи Squid (Proxy), логи неудачного входа в систему"
+    echo "(btmp, secure), которые часто копятся из-за попыток взлома."
     echo "Продолжить?"
     myread_yn ans
     case "$ans" in
 		y|Y)
-		rm -f -v /var/www/httpd-logs/*.gz
-		rm -f -v /var/log/nginx/*.gz
+		usedspace1=`df | awk '(NR == 2)' | awk {'print $3'}` #запоминаем сколько было занято места до очистки
+		rm -f -v /var/www/httpd-logs/*.gz #удаляем архивные логи Apache
+		rm -f -v /var/log/nginx/*.gz #удаляем архивные логи Nginx
+		cat /dev/null > /var/log/squid/access.log #удаляем логи squid
+		cat /dev/null > /var/log/squid/cache.log #удаляем логи squid
+		cat /dev/null > /var/log/btmp #очищаем логи неудачных попыток входа
+		cat /dev/null > /var/log/secure #очищаем сообщения безопасности/авторизации
 		service httpd restart
 		service nginx restart
+		usedspace2=`df | awk '(NR == 2)' | awk {'print $3'}` #смотрим сколько занято теперь
+		let freespace=$usedspace1-$usedspace2 #столько места освободили в байтах
+		let freespace=$freespace/1024 #столько места освободили в Мб
 		br
-		echo "Готово."
+		echo "Готово. Логи были очищены и было освобождено $freespace Мб."
+		br
 		wait    
     ;;
     esac
