@@ -527,6 +527,19 @@ log()
 changelog
 }
 
+release() #функция принудительной загрузки релиза
+{
+wget https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master/$filename -r -N -nd --no-check-certificate
+chmod 777 $filename
+#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
+}
+
+beta() #функция принудительной загрузки Бета-версии
+{
+wget https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta/$filename -r -N -nd --no-check-certificate
+chmod 777 $filename
+}
+
 #-----------------
 #задаем переменные
 #-----------------
