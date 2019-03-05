@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 11"
+ver="v1.9.2 Beta 12"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -8,8 +8,9 @@ title_full="$title $ver"
 
 #для рабты с цветами
 normal="\033[0m"
-green="\033[32"
-blue="\033[34"
+green="\033[32m"
+red="\033[1;31m"
+blue="\033[1;34m"
 black="\033[40m"
 textcolor=$green
 bgcolor=$black
@@ -17,18 +18,32 @@ bgcolor=$black
 color()
 {
 case "$1" in
-  "normal"|"default")
-    cat breeze.sh | sed -i 's/textcolor=.*/textcolor=$normal' | sed -i 's/bgcolor=.*/bgcolor=$normal' > breeze.sh
+  normal|default)
+    sed -i -e 's/^textcolor=.*/textcolor=$normal/' -e 's/^bgcolor=.*/bgcolor=$normal/' breeze.sh #меняем переменную в самом скрипте
+    textcolor=$normal #меняем переменную в текущей сессии
+    bgcolor=$normal #меняем переменную в текущей сессии
+    chosen=0 #выходим из терминала в главное меню
   ;;
-  "green")
-    cat breeze.sh | sed -i 's/textcolor=.*/textcolor=$green' | sed -i 's/bgcolor=.*/bgcolor=$black' > breeze.sh
+  green)
+    sed -i -e 's/^textcolor=.*/textcolor=$green/' -e 's/^bgcolor=.*/bgcolor=$black/' breeze.sh #меняем переменную в самом скрипте
+    textcolor=$green #меняем переменную в текущей сессии
+    bgcolor=$black #меняем переменную в текущей сессии
+    chosen=0 #выходим из терминала в главное меню
   ;;
-  "blue")
-    cat breeze.sh | sed -i 's/textcolor=.*/textcolor=$blue' | sed -i 's/bgcolor=.*/bgcolor=$blue' > breeze.sh
+  blue)
+    sed -i -e 's/^textcolor=.*/textcolor=$blue/' -e 's/^bgcolor=.*/bgcolor=$black/' breeze.sh #меняем переменную в самом скрипте
+    textcolor=$blue #меняем переменную в текущей сессии
+    bgcolor=$black #меняем переменную в текущей сессии
+    chosen=0 #выходим из терминала в главное меню
+  ;;
+  red)
+    sed -i -e 's/^textcolor=.*/textcolor=$red/' -e 's/^bgcolor=.*/bgcolor=$black/' breeze.sh #меняем переменную в самом скрипте
+    textcolor=$red #меняем переменную в текущей сессии
+    bgcolor=$black #меняем переменную в текущей сессии
+    chosen=0 #выходим из терминала в главное меню
   ;;
   *)
-echo "цвет указан неверно. Поддерживается только green, blue и default/normal"
-wait
+echo "цвет указан неверно. Поддерживается только green, blue, red и default/normal"
   ;;
 esac
 }
