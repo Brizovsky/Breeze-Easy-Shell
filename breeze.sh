@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 6"
+ver="v1.9.2 Beta 7"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -70,7 +70,7 @@ echo "$title"
 menu()
 {
 clear
-echo "$menu"
+echo -e "$green$menu"
 echo "Выберите пункт меню:"
 }
 
@@ -484,7 +484,7 @@ bench_hdd () {
 
 showinfo()
 {
-echo -e "$green┌──────────────────────────────────────────────────────────────┐"
+echo "┌──────────────────────────────────────────────────────────────┐"
 echo "│                     Информация о системе                     │"
 echo "└──────────────────────────────────────────────────────────────┘"
 echo "                            CPU: $cpu_cores x $cpu_clock MHz ($cpu_model)"
@@ -2453,4 +2453,5 @@ wait
 esac
 done
 echo "Скрипт ожидаемо завершил свою работу."
+echo "$normal"
 clear
