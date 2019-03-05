@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 2"
+ver="v1.9.2 Beta 3"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -530,7 +530,8 @@ release() #функция принудительной загрузки рели
 {
 wget https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master/$filename -r -N -nd --no-check-certificate
 chmod 777 $filename
-#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
+sh $0
+exit
 }
 
 beta() #функция принудительной загрузки Бета-версии
