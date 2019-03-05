@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 10"
+ver="v1.9.2 Beta 11"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -7,9 +7,31 @@ title_full="$title $ver"
 #-----------------
 
 #для рабты с цветами
-green='\033[0;32m'
-black='\033[40m'
-normal='\033[0m'
+normal="\033[0m"
+green="\033[32"
+blue="\033[34"
+black="\033[40m"
+textcolor=$green
+bgcolor=$black
+
+color()
+{
+case "$1" in
+  "normal"|"default")
+    cat breeze.sh | sed -i 's/textcolor=.*/textcolor=$normal' | sed -i 's/bgcolor=.*/bgcolor=$normal' > breeze.sh
+  ;;
+  "green")
+    cat breeze.sh | sed -i 's/textcolor=.*/textcolor=$green' | sed -i 's/bgcolor=.*/bgcolor=$black' > breeze.sh
+  ;;
+  "blue")
+    cat breeze.sh | sed -i 's/textcolor=.*/textcolor=$blue' | sed -i 's/bgcolor=.*/bgcolor=$blue' > breeze.sh
+  ;;
+  *)
+echo "цвет указан неверно. Поддерживается только green, blue и default/normal"
+wait
+  ;;
+esac
+}
 
 #функция, которая запрашивает только один символ
 myread()
@@ -70,7 +92,7 @@ echo "$title"
 
 menu()
 {
-echo -e "$green$black"
+echo -e "$textcolor$bgcolor"
 clear
 echo "$menu"
 echo "Выберите пункт меню:"
