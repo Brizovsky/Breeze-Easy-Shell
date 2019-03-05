@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 7"
+ver="v1.9.2 Beta 8"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -2453,5 +2453,5 @@ wait
 esac
 done
 echo "Скрипт ожидаемо завершил свою работу."
-echo "$normal"
+echo -e "$normal"
 clear
