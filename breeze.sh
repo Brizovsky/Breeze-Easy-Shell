@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 8"
+ver="v1.9.2 Beta 9"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -8,6 +8,7 @@ title_full="$title $ver"
 
 #для рабты с цветами
 green='\033[0;32m'
+black='\033[40m'
 normal='\033[0m'
 
 #функция, которая запрашивает только один символ
@@ -70,7 +71,7 @@ echo "$title"
 menu()
 {
 clear
-echo -e "$green$menu"
+echo -e "$green$black$menu"
 echo "Выберите пункт меню:"
 }
 
