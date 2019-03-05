@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 9"
+ver="v1.9.2 Beta 10"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -70,8 +70,9 @@ echo "$title"
 
 menu()
 {
+echo -e "$green$black"
 clear
-echo -e "$green$black$menu"
+echo "$menu"
 echo "Выберите пункт меню:"
 }
 
