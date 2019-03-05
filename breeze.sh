@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9"
+ver="v1.9.2 Beta 1"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -125,7 +125,7 @@ repo () {
 		esac
         ;;
         5)
-		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5"
+		echo "Будут добавлены репозитории EPEL, REMI, RepoForge (бывший RPMForge) и ELRepo для CentOS 5"
 		wait
 		echo "Устанавливаем репозитории..."
 		yum -y install epel-release
@@ -133,50 +133,47 @@ repo () {
 			case "$arc" in
 				32)
 				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.i386.rpm
-				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.i386.rpm
 				;;
 				64)
 				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
-				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-5-7.el5.x86_64.rpm
 				;;
 			esac
 		rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
         ;;
         6)
-		echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6"
+		echo "Будут добавлены репозитории EPEL, REMI, RepoForge (бывший RPMForge) и ELRepo для CentOS 6"
 		wait
 		echo "Устанавливаем репозитории..."
-		yum -y install epel-release
-		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+			#epel remi
+			wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+			wget https://rpms.remirepo.net/enterprise/remi-release-6.rpm
+			rpm -Uvh remi-release-6.rpm epel-release-latest-6.noarch.rpm
+			#RepoForge
 			case "$arc" in
 				32)
 				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/i386/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.i686.rpm
-				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
 				;;
 				64)
 				rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el6/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
-				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
 				;;
 			esac
-		rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
+		#elrepo
+		rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+		yum install https://www.elrepo.org/elrepo-release-6-8.el6.elrepo.noarch.rpm
         ;;
         7)
-		echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7"
+		echo "Будут добавлены репозитории EPEL, REMI, RepoForge (бывший RPMForge), ELRepo для CentOS 7"
 		wait
 		echo "Устанавливаем репозитории..."
-		rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
-		yum -y install epel-release
-		rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+		#RepoForge
 		rpm -ivh http://repository.it4i.cz/mirrors/repoforge/redhat/el7/en/x86_64/rpmforge/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
-		rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-			case "$arc" in
-				32)
-				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.i686.rpm
-				;;
-				64)
-				rpm -ivh http://dl.atrpms.net/all/atrpms-repo-6-7.el6.x86_64.rpm
-				;;
-			esac
+		#epel remi
+		wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+		wget https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+		rpm -Uvh remi-release-7.rpm epel-release-latest-7.noarch.rpm
+		#Elrepo
+		rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+		yum install https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
         ;;
         *) #сюда мы попали только если при ручном вводе версии RHEL указали несуществующую версию
         echo "Неправильно указана версия RHEL."
@@ -200,8 +197,12 @@ if [ "$chain" == "IN" ]; then chain="INPUT"; t1="dport"
 else
 	if [ "$chain" == "OUT" ]; then chain="OUTPUT";  t1="sport"
 	else
-		echo "неправильно указано направление правила для открытия порта"
-	wait
+		if [ "$chain" == "FWD" ]; then chain="FORWARD";  t1="sport"
+			iptables -I $chain -p $2 --dport $3 -j ACCEPT #дополнительная строка для варианта с FORWARD
+		else
+			echo "неправильно указано направление правила для открытия порта"
+			wait
+		fi
 	fi
 fi
 iptables -I $chain -p $2 --$t1 $3 -j ACCEPT #возможно в будущем предусмотрю выбор ключа -I или -A
@@ -396,21 +397,19 @@ esac
 bench_cpu () {
 threads=$cpu_cores #делаем кол-во потоков, равное кол-ву ядер
 if [ -z $threads ]; then threads=1; fi #если по какой-то причине мы не знаем сколько ядер, ставим в один поток
-if [ -z $cpu_clock ]; then cpu_clock=2394; fi #если по какой-то причине мы не знаем сколько ядер, ставим в один поток
-#totaltime=$(sysbench --test=cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "total time:" | awk {'print $3'}) #старая версия
-totaltime=$(sysbench cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "total time:" | awk {'print $3'}) #новая версия
-temp=$(echo "${totaltime%*s}") #убрали в конце "s"
-temp=$(echo "${temp/./}") #убрали точку
+#if [ -z $cpu_clock ]; then cpu_clock=2394; fi #если по какой-то причине мы не знаем свою частоту, то берем эталонную
+totalspeed=$(sysbench cpu --cpu-max-prime=10000 run --num-threads=$threads | grep "events per second:" | awk {'print $4'}) #записали общую скорость
+temp=$(echo "${totalspeed/./}") #убрали точку, т.е. умножили на 100.
 if [ ${temp:0:1} -eq 0 ]; then temp=$(echo "${temp:1}"); fi #проверили нет ли нуля в начале, если есть - убрали
-let "power = 600000 *10000 / $temp" #сколько тестов за минуту пройдет процессор. Количество умножено на 10000, чтобы работать с 4 знаками после запятой
-let "discountpower = $power * 2394 / $cpu_clock" #сколько тестов он бы прошёл при той же частоте, что и эталонный процессор
-reference=47800
-let "powerpercent = $power * 100 / $reference " #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах
+reference=75000 #скорость на эталонном процессоре, умноженная на 100.
+#let "discountpower = $power * 2394 / $cpu_clock" #сколько тестов он бы прошёл при той же частоте, что и эталонный процессор
+let "powerpercent = $temp * 1000 / $reference" #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах с десятыми долями (но без точки)
+powerpercent=$(echo $powerpercent|sed 's/.$/.&/') #добавили точку
 #let "discountpowerpercent = $discountpower * 100 / $reference " #мощность этого процессора делим на мощность эталлонного процессора и выражаем в процентах
-#echo "$discountpowerpercent%"
 if [ $threads -gt 1 ]; then #если ядер больше одного, посчитаем еще относительную мощность одного ядра к эталону
-let "powerpercore= $power / $threads" #сколько тестов он проходит в минуту в пересчете на одно ядро
-let "powerpercorepercent = $powerpercore * 100 / $reference " #мощность одного ядра этого процессора к мощности эталонного процессора
+let "speedpercore= $temp / $threads" #тут скорость уже умножена на 100
+let "powerpercorepercent = $speedpercore * 1000 / $reference " #мощность одного ядра этого процессора к мощности эталонного процессора, выражено в процентах с десятыми долями, но без точки
+powerpercorepercent=$(echo $powerpercorepercent|sed 's/.$/.&/') #добавили точку
 fi
 }
 
@@ -512,7 +511,7 @@ about()
 {
 echo "Данную утилиту написал Павел Евтихов (aka Brizovsky).
 г. Екатеринбург, Россия.
-2016-2017 год.
+2016-2019 год.
 "
 }
 changelog()
@@ -700,9 +699,11 @@ menu25="
   │ ├───┼───────────────────────────────────────────────┤
   ├─┤ 5 │ Открыть порт в iptables                       │
   │ ├───┼───────────────────────────────────────────────┤
-  ├─┤ 6 │ Посмотреть текущую политику firewall          │
+  ├─┤ 6 │ Закрыть ранее открытый порт в iptables        │
   │ ├───┼───────────────────────────────────────────────┤
-  ├─┤ 7 │ Сохранить текущие правила firewall            │
+  ├─┤ 7 │ Посмотреть текущую политику firewall          │
+  │ ├───┼───────────────────────────────────────────────┤
+  ├─┤ 8 │ Сохранить текущие правила firewall            │
   │ ├───┼───────────────────────────────────────────────┤
   └─┤ 0 │ Выйти на уровень вверх                        │
     └───┴───────────────────────────────────────────────┘
@@ -761,15 +762,17 @@ menu3="
 │ ├───┼────────────────────────┤
 ├─┤ 2 │ ISPmanager 5           │
 │ ├───┼────────────────────────┤
-├─┤ 3 │ Vesta CP               │
+├─┤ 3 │ Brainy CP              │
 │ ├───┼────────────────────────┤
-├─┤ 4 │ Webuzo                 │
+├─┤ 4 │ Vesta CP               │
 │ ├───┼────────────────────────┤
-├─┤ 5 │ CentOS Web Panel (CWP) │
+├─┤ 5 │ Webuzo                 │
 │ ├───┼────────────────────────┤
-├─┤ 6 │ ZPanel CP              │
+├─┤ 6 │ CentOS Web Panel (CWP) │
 │ ├───┼────────────────────────┤
-├─┤ 7 │ Ajenti                 │
+├─┤ 7 │ ZPanel CP              │
+│ ├───┼────────────────────────┤
+├─┤ 8 │ Ajenti                 │
 │ ├───┼────────────────────────┤
 └─┤ 0 │ Выйти на уровень вверх │
   └───┴────────────────────────┘
@@ -904,7 +907,7 @@ myread_dig pick
 		echo "Сейчас будет произведен тест скорости процессора. Ждите..."
 		bench_cpu
 		br
-		echo "Ваш процессор выполнил вычисления за $totaltime"
+		echo "Ваш процессор выполнил $totalspeed вычислений в секунду. Количество используемых потоков: $threads"
 		echo "Мощность вашего процессора соответствует $powerpercent% от эталонного одноядерного процессора."
 		if [ $cpu_cores -gt 1 ]; then echo "В пересчете на одно ядро мощность вашего процессора составляет $powerpercorepercent% от эталонного."; fi #пересчет на 1 ядро выводим только если ядер больше одного
 		br
@@ -1205,6 +1208,7 @@ fi
       echo "Укажите в какую сторону вы хотите открыть порт:"
       echo "1) Входящие соединения (чтобы к этому серверу можно было подключиться по заданному порту)"
       echo "2) Исходящие соединения (чтобы этот сервер мог подключиться к другим компьютерам по заданному порту)"
+      echo "3) Перенаправление пакетов (раздел FORWARD)"
       myread_dig taffic_type
       case "$taffic_type" in
       1)
@@ -1213,6 +1217,9 @@ fi
       2)
       taffic_type=out
       ;;
+	  3)
+      taffic_type=fwd
+      ;;      
       *)
       echo "Неправильный выбор. Аварийный выход."
       wait
@@ -1247,12 +1254,45 @@ fi
       echo "Готово."
       wait
       ;;
-      6) #Посмотреть текущую политику firewall
+      6) #Закрыть ранее открытый порт в iptables
+	  br
+	  iptables --list --line-numbers
+	  br
+	  echo "Из какого раздела вы хотите удалить правило?"
+      echo "1) Входящие соединения (раздел INPUT)"
+      echo "2) Исходящие соединения (раздел OUTPUT)"
+      echo "3) Перенаправление пакетов (раздел FORWARD)"
+      myread_dig section
+      case "$section" in
+      	1)
+      	section=INPUT
+      	;;
+      	2)
+      	section=OUTPUT
+      	;;
+	  	3)
+      	section=FORWARD
+      	;;      
+      	*)
+      	echo "Неправильный выбор. Аварийный выход."
+      	wait
+      	exit
+      	;;
+      esac
+      echo "Правило под каким номером нужно удалить?"
+      myread_dig rule_number
+      iptables -D $section $rule_number
+	  iptables_save
+	  br
+      echo "Правило удалено"
+	  wait
+	  ;;
+      7) #Посмотреть текущую политику firewall
       iptables -nvL
       br
       wait
       ;;
-      7) #Сохранить текущие правила firewall
+      8) #Сохранить текущие правила firewall
       iptables_save
       br
       echo "Готово."
@@ -1630,7 +1670,23 @@ myread_dig pick
       ;;
     esac
     ;;
-    3) #Vesta CP
+    3) #Brainy CP
+    clear
+    echo 'Панель управления "Brainy"'
+    echo 'Поддержка ОС: CentOS 7 64bit (и только эта ОС!)'
+    echo 'Системные требования (минимальные): 512 Mb RAM + 1Gb SWAP, HDD 2 Gb в корневом разделе'
+    echo 'Системные требования (рекомендованные): 2 Gb RAM + 2Gb SWAP, HDD 3 Gb в корневом разделе'
+    echo 'Лицензия: Панель абсолютно бесплатная'
+    echo 'Язык: Русский, Английский, Польский'
+    echo 'Хотите установить?'
+    myread_yn pick
+    case "$pick" in
+      y|Y)
+	  yum clean all && yum install -y wget && wget http://core.brainycp.com/install.sh && bash ./install.sh
+      ;;
+    esac
+    ;;
+    4) #Vesta CP
     clear
     echo 'Панель управления "Vesta CP"'
     echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
@@ -1662,11 +1718,11 @@ myread_dig pick
       ;;
     esac
     ;;
-    4) #Webuzo
+    5) #Webuzo
     clear
     echo 'Панель управления "Webuzo"'
     echo 'Поддержка ОС: CentOS 5.x, 6.x | RHEL 5.x, 6.x | Scientific Linux 5.x, 6.x | Ubuntu LTS'
-    echo 'Системные требования: 512 MB RAM (minimum)'
+    echo 'Системные требования: 512 Mb RAM (minimum)'
     echo 'Лицензия: Панель управления имеет платную и бесплатную версию. Установите без лицензии для использования бесплатной версии.'
     echo 'Язык: Английский'
     echo 'Хотите установить?'
@@ -1707,7 +1763,7 @@ myread_dig pick
       ;;
     esac
     ;;
-    5) #CentOS Web Panel (CWP)
+    6) #CentOS Web Panel (CWP)
     clear
     echo 'Панель управления "CentOS Web Panel (CWP)"'
     echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x | CloudLinux 6.x'
@@ -1755,7 +1811,7 @@ myread_dig pick
       ;;
     esac
     ;;
-    6) #ZPanel CP
+    7) #ZPanel CP
     clear
     echo 'Панель управления "ZPanel CP"'
     echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x'
@@ -1803,7 +1859,7 @@ myread_dig pick
       ;;
     esac
     ;;
-    7) #Ajenti
+    8) #Ajenti
     clear
     echo 'Панель управления "Ajenti"'
     echo 'Поддержка ОС: CentOS 6, 7 | Debian 6, 7, 8 | Ubuntu | Gentoo'
@@ -2304,12 +2360,18 @@ myread_dig pick
 		usedspace1=`df | awk '(NR == 2)' | awk {'print $3'}` #запоминаем сколько было занято места до очистки
 		rm -f -v /var/www/httpd-logs/*.gz #удаляем архивные логи Apache
 		rm -f -v /var/log/nginx/*.gz #удаляем архивные логи Nginx
-		cat /dev/null > /var/log/squid/access.log #удаляем логи squid
-		cat /dev/null > /var/log/squid/cache.log #удаляем логи squid
+		del_squid() #упаковали удаление этих логов в функцию потому, что без этого, почему-то не скрывается вывод ошибок. о_О
+			{
+			cat /dev/null > /var/log/squid/access.log #удаляем логи squid
+			cat /dev/null > /var/log/squid/cache.log #удаляем логи squid
+			}
+		del_squid 2>/dev/null
 		cat /dev/null > /var/log/btmp #очищаем логи неудачных попыток входа
+		rm /var/log/btmp-* -f #удаляет логи за другие даты
 		cat /dev/null > /var/log/secure #очищаем сообщения безопасности/авторизации
-		service httpd restart
-		service nginx restart
+		rm /var/log/secure-* -f #удаляет логи за другие даты
+		service httpd restart 2>/dev/null
+		service nginx restart 2>/dev/null
 		usedspace2=`df | awk '(NR == 2)' | awk {'print $3'}` #смотрим сколько занято теперь
 		let freespace=$usedspace1-$usedspace2 #столько места освободили в байтах
 		let freespace=$freespace/1024 #столько места освободили в Мб
