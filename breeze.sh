@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 15"
+ver="v1.9.2 Beta 16"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -48,7 +48,7 @@ echo "цвет указан неверно. Поддерживается тол�
 esac
 }
 
-my_my_clear()
+my_clear()
 {
 echo -e "$textcolor$bgcolor"
 clear
@@ -2498,4 +2498,4 @@ esac
 done
 echo "Скрипт ожидаемо завершил свою работу."
 echo -e "$normal"
-my_clear
+clear
