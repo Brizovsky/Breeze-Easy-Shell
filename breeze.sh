@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 12"
+ver="v1.9.2 Beta 13"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -228,7 +228,7 @@ iptables_save()
 {
 #проверка CentOS 7
 if [ $osver1 -eq 7 ]; then
-	myinstall iptables-services | tee > null
+	myinstall iptables-services | tee > /dev/null
 fi
 service iptables save
 }
@@ -346,7 +346,7 @@ uninstall()
 {
 if [ $osver1 -eq 5 ]; then yum erase $1 $2 $3 $4 $5;
 else
-myinstall yum-remove-with-leaves | tee > null
+myinstall yum-remove-with-leaves | tee > /dev/null
 yum --remove-leaves remove $1 $2 $3 $4 $5
 fi
 }
@@ -356,7 +356,7 @@ whatismyiface()
 {
 if [ $osver1 -eq 7 ]; then
   installed net-tools
-  if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
+  if [ $exist == false ]; then yum -y install net-tools | tee > /dev/null; fi
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
 else
@@ -1133,7 +1133,7 @@ fi
         if [ $osver1 -eq 7 ]; then 
         systemctl stop firewalld
 		systemctl mask firewalld
-		myinstall iptables-services | tee > null
+		myinstall iptables-services | tee > /dev/null
 		systemctl enable iptables
         fi
         iptables -F
@@ -1243,7 +1243,7 @@ fi
       ;;
       4) #Перезапустить firewall
       if [ $osver1 -eq 7 ]; then 
-	  myinstall iptables-services | tee > null
+	  myinstall iptables-services | tee > /dev/null
       fi
       service iptables restart
       br
@@ -1593,7 +1593,7 @@ fi
 			echo "Неправильный выбор..."
 			;;
 		esac
-		service crond reload  | tee > null
+		service crond reload  | tee > /dev/null
 		br
 		wait
 		;;
