@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 13"
+ver="v1.9.2 Beta 15"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -46,6 +46,12 @@ case "$1" in
 echo "цвет указан неверно. Поддерживается только green, blue, red и default/normal"
   ;;
 esac
+}
+
+my_my_clear()
+{
+echo -e "$textcolor$bgcolor"
+clear
 }
 
 #функция, которая запрашивает только один символ
@@ -101,14 +107,13 @@ fi
 
 title()
 {
-clear
+my_clear
 echo "$title"
 }
 
 menu()
 {
-echo -e "$textcolor$bgcolor"
-clear
+my_clear
 echo "$menu"
 echo "Выберите пункт меню:"
 }
@@ -912,29 +917,29 @@ fi
 case "$pick" in
 1) #Информация о системе
 chosen=1
-clear
+my_clear
 echo "$title"
 echo "$menu1"
 myread_dig pick
     case "$pick" in
     1) #Показать общую информацию о системе
-		clear
+		my_clear
 		showinfo
 		br
 		echo "Вычисляем Ваш IP на интерфейсе..."
 		whatismyip
-		clear
+		my_clear
 		showinfo
 		br
 		echo "Вычисляем Ваш внешний IP..."
 		whatismyipext
-		clear
+		my_clear
 		showinfo
 		br
 		wait
     ;;
     2) #Провести тест скорости CPU
-		clear
+		my_clear
 		installed sysbench
 		if [ $exist == false ]; then
 			echo "Сейчас будет произведена установка программы sysbench. Но для её установки нужно наличие добавленного репозитория EPEL."
@@ -949,7 +954,7 @@ myread_dig pick
 			esac
 			myinstall sysbench
 		fi
-		clear
+		my_clear
 		echo "Сейчас будет произведен тест скорости процессора. Ждите..."
 		bench_cpu
 		br
@@ -960,7 +965,7 @@ myread_dig pick
 		wait
     ;;
     3) #Провести тест скорости диска
-		clear
+		my_clear
 		echo "Сейчас будет произведен тест скорости диска. Ждите..."
 		br
 		bench_hdd
@@ -970,7 +975,7 @@ myread_dig pick
 		wait
     ;;
     4) #Описание теста производительности
-		clear
+		my_clear
 		echo "Для теста производительности процессора используется утилита sysbench."
 		echo "В ней используется 10000 проходов. Количество потоков устанавливается равным"
 		echo "количеству ядер вашего процессора (если не удалось определить количество ядер,"
@@ -992,7 +997,7 @@ myread_dig pick
 ;;
 2) #Работа с ОС
 chosen=2
-clear
+my_clear
 if [ $chosen2 -eq 0 ]; then #выводим меню, только если ещё никуда не заходили
 echo "$title"
 echo "$menu2"
@@ -1035,7 +1040,7 @@ fi
     ;;
     4) #Антивирус
     chosen2=4
-    clear
+    my_clear
     echo "$title"
     echo "$menu24"
     myread_dig pick
@@ -1113,13 +1118,13 @@ fi
     ;;
     5) #Firewall (iptables)
     chosen2=5
-    clear
+    my_clear
     echo "$title"
     echo "$menu25"
     myread_dig pick
     case "$pick" in
       1) #Включить firewall (помощник настройки)
-      clear
+      my_clear
       echo "Сейчас будут удалены все правила iptables (если они были), установлен запрет"
       echo "на обработку всех входящих и исходящих пакетов, кроме внутреннего обмена"
       echo "пакетами (localhost), SSH-подключения (22 порт) и всех связанных пакетов"
@@ -1351,7 +1356,7 @@ fi
     ;;
     6) #Планировщик задач (cron)
     chosen2=6
-    clear
+    my_clear
     echo "$title"
     echo "$menu26"
 	myread_dig pick
@@ -1374,7 +1379,7 @@ fi
 				br
 				echo "Установка завершена, продолжаем работу..."
 				wait
-				clear
+				my_clear
 				;;
 			esac
 		fi
@@ -1409,7 +1414,7 @@ fi
 		wait
 		;;
 		3) #Добавить задание в планировщик (cron)
-		clear
+		my_clear
 		echo "Введите команду, которую должен выполнять планировщик:"
 		read cron_task
 		br
@@ -1620,7 +1625,7 @@ fi
 	esac	
     ;;
     7) #Установить часовой пояс
-    clear
+    my_clear
     echo "$title"
     echo "$menu27"
     echo "Текущее время на этом компьютере: $(date +%H:%M). Выберите часовой пояс, который хотите установить."
@@ -1676,13 +1681,13 @@ fi
 ;;
 3) #Установить панель управления хостингом
 chosen=3
-clear
+my_clear
 echo "$title"
 echo "$menu3"
 myread_dig pick
     case "$pick" in
     1) #ISPmanager 4
-    clear
+    my_clear
     echo 'Панель управления "ISPManager 4"'
     echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
     echo 'Системные требования: минимальные не определены'
@@ -1700,7 +1705,7 @@ myread_dig pick
     esac
     ;;
     2) #ISPmanager 5
-    clear
+    my_clear
     echo 'Панель управления "ISPManager 5"'
     echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
     echo 'Системные требования: минимальные не определены'
@@ -1717,7 +1722,7 @@ myread_dig pick
     esac
     ;;
     3) #Brainy CP
-    clear
+    my_clear
     echo 'Панель управления "Brainy"'
     echo 'Поддержка ОС: CentOS 7 64bit (и только эта ОС!)'
     echo 'Системные требования (минимальные): 512 Mb RAM + 1Gb SWAP, HDD 2 Gb в корневом разделе'
@@ -1733,7 +1738,7 @@ myread_dig pick
     esac
     ;;
     4) #Vesta CP
-    clear
+    my_clear
     echo 'Панель управления "Vesta CP"'
     echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
     echo 'Системные требования: минимальные не определены'
@@ -1765,7 +1770,7 @@ myread_dig pick
     esac
     ;;
     5) #Webuzo
-    clear
+    my_clear
     echo 'Панель управления "Webuzo"'
     echo 'Поддержка ОС: CentOS 5.x, 6.x | RHEL 5.x, 6.x | Scientific Linux 5.x, 6.x | Ubuntu LTS'
     echo 'Системные требования: 512 Mb RAM (minimum)'
@@ -1810,7 +1815,7 @@ myread_dig pick
     esac
     ;;
     6) #CentOS Web Panel (CWP)
-    clear
+    my_clear
     echo 'Панель управления "CentOS Web Panel (CWP)"'
     echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x | CloudLinux 6.x'
     echo 'Системные требования: 512 MB RAM (minimum)'
@@ -1858,7 +1863,7 @@ myread_dig pick
     esac
     ;;
     7) #ZPanel CP
-    clear
+    my_clear
     echo 'Панель управления "ZPanel CP"'
     echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x'
     echo 'Системные требования: не указаны разработчиком'
@@ -1906,7 +1911,7 @@ myread_dig pick
     esac
     ;;
     8) #Ajenti
-    clear
+    my_clear
     echo 'Панель управления "Ajenti"'
     echo 'Поддержка ОС: CentOS 6, 7 | Debian 6, 7, 8 | Ubuntu | Gentoo'
     echo 'Системные требования: 35 Mb RAM '
@@ -1963,7 +1968,7 @@ myread_dig pick
 ;;
 4) #Установка и настройка VPN-сервера
 chosen=4
-clear
+my_clear
 echo "$title"
 echo "$menu4"
 myread_dig pick
@@ -2094,7 +2099,7 @@ END
     wait
     ;;
     5) #Удалить VPN-сервер
-    clear
+    my_clear
     echo "Внимание! Будет полностью удален VPN-сервер, файл с логинами/паролями и файл настроек"
     echo "Продолжить?"
     myread_yn ans
@@ -2136,7 +2141,7 @@ END
 ;;
 5) #Работа с Proxy
 chosen=5
-clear
+my_clear
 echo "$title"
 echo "$menu5"
 myread_dig pick
@@ -2307,7 +2312,7 @@ END
 	wait
     ;;
     6) #Открыть файл с логинами/паролями пользователей Proxy
-    clear
+    my_clear
     br
     echo "ВНИМАНИЕ! В этом файле содержатся не пароли пользователей, а их хэш-суммы!"
     echo "Редактировать пароли в этом файле нельзя! Вы можете отредактировать только логин."
@@ -2334,7 +2339,7 @@ END
 ;;
 6) #Работа с файлами и программами
 chosen=6
-clear
+my_clear
 echo "$title"
 echo "$menu6"
 myread_dig pick
@@ -2384,7 +2389,7 @@ myread_dig pick
 ;;
 7) #Очистка системы
 chosen=7
-clear
+my_clear
 echo "$title"
 echo "$menu7"
 myread_dig pick
@@ -2454,7 +2459,7 @@ myread_dig pick
 ;;
 8) #терминал
 chosen=8
-clear
+my_clear
 echo '┌──────────┐'
 echo '│ Терминал │'
 echo '└──────────┘'
@@ -2493,4 +2498,4 @@ esac
 done
 echo "Скрипт ожидаемо завершил свою работу."
 echo -e "$normal"
-clear
+my_clear
