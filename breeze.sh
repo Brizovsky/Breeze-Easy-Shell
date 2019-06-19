@@ -221,7 +221,7 @@ repo () {
 		rpm -Uvh remi-release-7.rpm epel-release-latest-7.noarch.rpm
 		#Elrepo
 		rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-		yum install https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+		yum install https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm -y
         ;;
         *) #сюда мы попали только если при ручном вводе версии RHEL указали несуществующую версию
         echo "Неправильно указана версия RHEL."
@@ -1734,6 +1734,7 @@ myread_dig pick
     case "$pick" in
       y|Y)
 	  yum clean all && yum install -y wget && wget http://core.brainycp.com/install.sh && bash ./install.sh
+	  wait
       ;;
     esac
     ;;
