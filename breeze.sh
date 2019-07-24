@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.9.2 Beta 16"
+ver="v1.10.0 Beta 1"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -848,23 +848,57 @@ menu4="
 menu5="
 ● Работа с Proxy:
 │
-│ ┌───┬────────────────────────────────────────────────┐
-├─┤ 1 │ Установить Proxy-сервер (на базе Squid)        │
-│ ├───┼────────────────────────────────────────────────┤
-├─┤ 2 │ Удалить Proxy (Squid)                          │
-│ ├───┼────────────────────────────────────────────────┤
-├─┤ 3 │ Поменять MTU для интерфейса                    │
-│ ├───┼────────────────────────────────────────────────┤
-├─┤ 4 │ Открыть файл настроек Squid                    │
-│ ├───┼────────────────────────────────────────────────┤
-├─┤ 5 │ Добавить пользователя Proxy                    │
-│ ├───┼────────────────────────────────────────────────┤
-├─┤ 6 │ Открыть файл с логинами/паролями пользователей │
-│ ├───┼────────────────────────────────────────────────┤
-├─┤ 7 │ Перезапустить сервис Proxy (Squid)             │
-│ ├───┼────────────────────────────────────────────────┤
-└─┤ 0 │ Выйти на уровень вверх                         │
-  └───┴────────────────────────────────────────────────┘
+│ ┌───┬────────────────────────┐
+├─┤ 1 │ Squid (HTTP-прокси)    │
+│ ├───┼────────────────────────┤
+├─┤ 2 │ Dante (SOCKS5)         │
+│ ├───┼────────────────────────┤
+└─┤ 0 │ Выйти на уровень вверх │
+  └───┴────────────────────────┘
+"
+menu51="
+● Работа с Proxy:
+│
+└─● Squid (HTTP-прокси):
+  │ ┌───┬────────────────────────────────────────────────┐
+  ├─┤ 1 │ Установить Proxy-сервер (на базе Squid)        │
+  │ ├───┼────────────────────────────────────────────────┤
+  ├─┤ 2 │ Удалить Proxy-сервер (Squid)                   │
+  │ ├───┼────────────────────────────────────────────────┤
+  ├─┤ 3 │ Открыть файл настроек Squid                    │
+  │ ├───┼────────────────────────────────────────────────┤
+  ├─┤ 4 │ Открыть файл с логинами/паролями пользователей │
+  │ ├───┼────────────────────────────────────────────────┤
+  ├─┤ 5 │ Добавить пользователя Proxy                    │
+  │ ├───┼────────────────────────────────────────────────┤
+  ├─┤ 6 │ Поменять MTU для интерфейса                    │
+  │ ├───┼────────────────────────────────────────────────┤
+  ├─┤ 7 │ Перезапустить сервис Proxy (Squid)             │
+  │ ├───┼────────────────────────────────────────────────┤
+  └─┤ 0 │ Выйти на уровень вверх                         │
+    └───┴────────────────────────────────────────────────┘
+"
+menu52="
+● Работа с Proxy:
+│
+└─● Dante Server (SOCKS5):
+  │ ┌───┬────────────────────────────────────────┐
+  ├─┤ 1 │ Установить Dante (SOCKS5 Proxy-сервер) │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 2 │ Удалить Dante                          │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 3 │ Открыть файл настроек Dante            │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 4 │ Открыть файл с логинами пользователей  │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 5 │ Добавить пользователя                  │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 6 │ Удалить пользователя                   │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 7 │ Перезапустить сервис Dante             │
+  │ ├───┼────────────────────────────────────────┤
+  └─┤ 0 │ Выйти на уровень вверх                 │
+    └───┴────────────────────────────────────────┘
 "
 menu6="
 ● Работа с файлами и программами:
@@ -903,6 +937,7 @@ menu7="
 repeat=true
 chosen=0
 chosen2=0
+chosen5=0
 while [ "$repeat" = "true" ] #выводим меню, пока не надо выйти
 do
 
@@ -2142,200 +2177,239 @@ END
 5) #Работа с Proxy
 chosen=5
 my_clear
+if [ $chosen5 -eq 0 ]; then #выводим меню, только если ещё никуда не заходили
 echo "$title"
 echo "$menu5"
 myread_dig pick
+else
+pick=$chosen5
+fi
     case "$pick" in
-    1) #Установить Proxy-сервер (на базе Squid)
-    echo "Начинаем установку squid"
-    yum -y install squid
-    echo "Squid был установлен"
-    sed -i "/http_access deny all/d" "/etc/squid/squid.conf" #удаляем строку с запретом доступа (ниже добавим снова при необходимости)
-    echo "#Ниже добавлены наши наcтройки" >> /etc/squid/squid.conf
-    br
-    echo 'По умолчанию Proxy работает на порту 3128, но его можно поменять. Хотите изменить порт?'
-    myread_yn ans
-    port=3128 #ставим порт по умолчанию, далее, если надо, его переопределяем
-      case "$ans" in
-        y|Y)
-        echo 'Укажите порт, на котором должен работать Proxy?'
-        read port
-        sed -i "/http_port/d" "/etc/squid/squid.conf" #удаляем строку с настройкой порта
-        echo "http_port $port" >> /etc/squid/squid.conf #добавляем строку с настройкой порта
-        ;;
-      esac
-    br
-    echo "Выберите вариант авторизации на Proxy:"
-    echo "1) Свободный доступ (любой, кто знает IP и порт - может воспользоваться)"
-    echo "2) Доступ по логину/паролю"
-    myread_dig ans
-    case "$ans" in
-		1)
-		echo "http_access allow all" >> /etc/squid/squid.conf
-		echo 'Был открыт доступ всем пользователям'
-		br
-		;;
-		2)
-		case "$osver1" in
-			4|5)
-			installed htpasswd
-			if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
-			;;
-			6|7)
-			installed htpasswd
-			if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
-			;;
-		esac
-		touch /etc/squid/internet_users #создаем файл с логинами-паролями
-		chmod 440 /etc/squid/internet_users #выставляем права на этот файл
-		chown squid:squid /etc/squid/internet_users
-		ncsa_path=$(find / -name "ncsa_auth") #определяем путь ncsa_auth
-		if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "basic_ncsa_auth"); fi #если ncsa_auth не найден, пробуем искать basic_ncsa_auth
-		if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "*ncsa_auth"); fi #если и теперь ncsa_auth не найден, пробуем искать другой ncsa_auth
-		br
-		echo "Укажите логин пользователя:"
-		read login
-		login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
-		htpasswd /etc/squid/internet_users $login_lower
-		echo "auth_param basic program $ncsa_path /etc/squid/internet_users " >> /etc/squid/squid.conf
-		echo "auth_param basic children 32" >> /etc/squid/squid.conf #кол-во юзеров
-		echo "auth_param basic realm Enter login and password to use this Proxy " >> /etc/squid/squid.conf #приветственная фраза
-		echo "auth_param basic credentialsttl 8 hours " >> /etc/squid/squid.conf #На сколько запоминать авторизацию
-		echo "acl internet_users proxy_auth REQUIRED " >> /etc/squid/squid.conf
-		echo "http_access allow internet_users " >> /etc/squid/squid.conf
-		echo "http_access deny all " >> /etc/squid/squid.conf #запретили доступ всем, кроме авторизованных пользователей
-		;;
-		*)
-		echo "Неправильный выбор. Аварийный выход."
-		wait
-		exit
-		;;
-    esac
-    #открываем порт в iptables
-    br
-    echo "Сейчас откроем порт в iptables, чтобы можно было подключиться к серверу"
-    openport in tcp $port
-    br
-      echo 'По умолчанию Proxy не является анонимным и можно определить Ваш IP, когда Вы им пользуетесь'
-      echo 'Хотите сделать Ваш Proxy полностью анонимным?'
-      myread_yn ans
-      case "$ans" in
-        y|Y)
-       br
-       echo 'Имейте ввиду, что такой Proxy-сервер нарушает правила протокола HTTP и является НЕЗАКОННЫМ.'
-       echo 'Всю ответственность за такой сервер - несёте вы. Всё ещё хотите продолжить?'
-       myread_yn ans
-        case "$ans" in
-          y|Y)
+    1) #Squid (HTTP-прокси)
+	chosen5=1
+    my_clear
+    echo "$title"
+    echo "$menu51"
+    myread_dig pick
+    case "$pick" in
+	    1) #Установить Proxy-сервер (на базе Squid)
+		    echo "Начинаем установку squid"
+		    yum -y install squid
+		    echo "Squid был установлен"
+		    sed -i "/http_access deny all/d" "/etc/squid/squid.conf" #удаляем строку с запретом доступа (ниже добавим снова при необходимости)
+		    echo "#Ниже добавлены наши наcтройки" >> /etc/squid/squid.conf
+		    br
+		    echo 'По умолчанию Proxy работает на порту 3128, но его можно поменять. Хотите изменить порт?'
+		    myread_yn ans
+		    port=3128 #ставим порт по умолчанию, далее, если надо, его переопределяем
+		      case "$ans" in
+		        y|Y)
+		        echo 'Укажите порт, на котором должен работать Proxy?'
+		        read port
+		        sed -i "/http_port/d" "/etc/squid/squid.conf" #удаляем строку с настройкой порта
+		        echo "http_port $port" >> /etc/squid/squid.conf #добавляем строку с настройкой порта
+		        ;;
+		      esac
+		    br
+		    echo "Выберите вариант авторизации на Proxy:"
+		    echo "1) Свободный доступ (любой, кто знает IP и порт - может воспользоваться)"
+		    echo "2) Доступ по логину/паролю"
+		    myread_dig ans
+		    case "$ans" in
+				1)
+				echo "http_access allow all" >> /etc/squid/squid.conf
+				echo 'Был открыт доступ всем пользователям'
+				br
+				;;
+				2)
+				case "$osver1" in
+					4|5)
+					installed htpasswd
+					if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
+					;;
+					6|7)
+					installed htpasswd
+					if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
+					;;
+				esac
+				touch /etc/squid/internet_users #создаем файл с логинами-паролями
+				chmod 440 /etc/squid/internet_users #выставляем права на этот файл
+				chown squid:squid /etc/squid/internet_users
+				ncsa_path=$(find / -name "ncsa_auth") #определяем путь ncsa_auth
+				if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "basic_ncsa_auth"); fi #если ncsa_auth не найден, пробуем искать basic_ncsa_auth
+				if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "*ncsa_auth"); fi #если и теперь ncsa_auth не найден, пробуем искать другой ncsa_auth
+				br
+				echo "Укажите логин пользователя:"
+				read login
+				login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
+				htpasswd /etc/squid/internet_users $login_lower
+				echo "auth_param basic program $ncsa_path /etc/squid/internet_users " >> /etc/squid/squid.conf
+				echo "auth_param basic children 32" >> /etc/squid/squid.conf #кол-во юзеров
+				echo "auth_param basic realm Enter login and password to use this Proxy " >> /etc/squid/squid.conf #приветственная фраза
+				echo "auth_param basic credentialsttl 8 hours " >> /etc/squid/squid.conf #На сколько запоминать авторизацию
+				echo "acl internet_users proxy_auth REQUIRED " >> /etc/squid/squid.conf
+				echo "http_access allow internet_users " >> /etc/squid/squid.conf
+				echo "http_access deny all " >> /etc/squid/squid.conf #запретили доступ всем, кроме авторизованных пользователей
+				;;
+				*)
+				echo "Неправильный выбор. Аварийный выход."
+				wait
+				exit
+				;;
+		    esac
+		    #открываем порт в iptables
+		    br
+		    echo "Сейчас откроем порт в iptables, чтобы можно было подключиться к серверу"
+		    openport in tcp $port
+		    br
+		      echo 'По умолчанию Proxy не является анонимным и можно определить Ваш IP, когда Вы им пользуетесь'
+		      echo 'Хотите сделать Ваш Proxy полностью анонимным?'
+		      myread_yn ans
+		      case "$ans" in
+		        y|Y)
+		       br
+		       echo 'Имейте ввиду, что такой Proxy-сервер нарушает правила протокола HTTP и является НЕЗАКОННЫМ.'
+		       echo 'Всю ответственность за такой сервер - несёте вы. Хостер на основании этого может забанить ваш сервер.'
+		       echo 'Всё ещё хотите продолжить делать анонимный Proxy?'
+		       myread_yn ans
+		        case "$ans" in
+		          y|Y)
 cat >> /etc/squid/squid.conf <<END
 via off
 forwarded_for delete
 END
-          ;;
-        esac
-        ;;
-      esac
-    br
-    echo 'Вы хотите настроить Proxy таким образом, чтобы можно было использовать программы, типа Proxifier?'
-    echo 'В этом случае будет разрешен проброс SSL туннеля на порт 80. Если вы не уверены, ответьте "нет"'
-    myread_yn ans
-        case "$ans" in
-          y|Y)
-          sed -i -e '/http_access deny CONNECT !SSL_ports/d' /etc/squid/squid.conf #Удаляем из конфига строчку http_access deny CONNECT !SSL_ports
-          echo '#http_access deny CONNECT !SSL_ports' >> /etc/squid/squid.conf #возвращаем ее назад в закомментированном виде"
-          ;;
-        esac
-    br
-    echo "Добавляем Squid в автозагрузку..."
-    chkconfig squid on
-    br
-    service squid restart
-    br
-    echo "Proxy-сервер был успешно настроен. Если подключение к нему есть, но трафик не идёт, то, возможно"
-    echo "проблема в MTU. Вы можете его настроить в соответствующем разделе."
-    br
-	whatismyipext
-    echo "Параметры вашего Proxy:"
-    echo "IP: $ipext"
-    echo "Порт: $port"
-    echo "Пользователь: $login"
-    br
-    wait
-    ;;
-    2) #Удалить Proxy (Squid)
-    echo "Будет удален Proxy-сервер (Squid), а также файл настроек и файл"
-    echo "с логинами/паролями пользователей. Продолжить?"
-    myread_yn ans
-    case "$ans" in
-		y|Y)
-		echo "Начинаем удаление squid..."
-		uninstall -y squid
-		rm -f /etc/squid/squid.conf
-		rm -f /etc/squid/internet_users
-		br
-		echo 'Squid был удален'
-		wait
-		;;
+		          ;;
+		          n|N)
+				  echo "Дальше будет продолжена настройка не анонимного Proxy-сервера..."
+				  wait
+				  ;;
+		        esac
+		        ;;
+		      esac
+		    br
+		    echo 'Вы хотите настроить Proxy таким образом, чтобы можно было использовать программы, типа Proxifier?'
+		    echo 'В этом случае будет разрешен проброс SSL туннеля на порт 80. Если вы не уверены, ответьте "нет"'
+		    myread_yn ans
+		        case "$ans" in
+		          y|Y)
+		          sed -i -e '/http_access deny CONNECT !SSL_ports/d' /etc/squid/squid.conf #Удаляем из конфига строчку http_access deny CONNECT !SSL_ports
+		          echo '#http_access deny CONNECT !SSL_ports' >> /etc/squid/squid.conf #возвращаем ее назад в закомментированном виде"
+		          ;;
+		        esac
+		    br
+		    echo "Добавляем Squid в автозагрузку..."
+		    chkconfig squid on
+		    br
+		    service squid restart
+		    br
+		    echo "Proxy-сервер был успешно настроен. Если подключение к нему есть, но трафик не идёт, то, возможно"
+		    echo "проблема в MTU. Вы можете его настроить в соответствующем разделе."
+		    br
+			whatismyipext
+		    echo "Параметры вашего Proxy:"
+		    echo "IP: $ipext"
+		    echo "Порт: $port"
+		    echo "Пользователь: $login"
+		    br
+		    wait
+	    ;;
+	    2) #Удалить Proxy (Squid)
+		    echo "Будет удален Proxy-сервер (Squid), а также файл настроек и файл"
+		    echo "с логинами/паролями пользователей. Продолжить?"
+		    myread_yn ans
+		    case "$ans" in
+				y|Y)
+				echo "Начинаем удаление squid..."
+				uninstall -y squid
+				rm -f /etc/squid/squid.conf
+				rm -f /etc/squid/internet_users
+				br
+				echo 'Squid был удален'
+				wait
+				;;
+			esac
+	    ;;
+	    3) #Открыть файл настроек Squid
+		    edit /etc/squid/squid.conf
+	    ;;
+	    4) #Открыть файл с логинами/паролями пользователей Proxy
+		    my_clear
+		    br
+		    echo "ВНИМАНИЕ! В этом файле содержатся не пароли пользователей, а их хэш-суммы!"
+		    echo "Редактировать пароли в этом файле нельзя! Вы можете отредактировать только логин."
+			echo "Из этого файла Вы можете просто посмотреть какие у Вас есть пользователи и можете удалить кого-то."
+			echo "Для удаления пользователя просто сотрите соответствующую строку и сохраните файл."
+		    echo "Если нужно изменить пароль - просто создайте заново пользователя с тем же логином."
+		    br
+		    wait
+		    edit /etc/squid/internet_users
+	    ;;    
+	    5) #Добавить пользователей Proxy
+			br
+			case "$osver1" in
+				4|5)
+					installed htpasswd
+					if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
+				;;
+				6|7)
+					installed htpasswd
+					if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
+				;;
+			esac
+			br
+			echo "Укажите логин пользователя:"
+			read login
+			login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
+			htpasswd /etc/squid/internet_users $login_lower    
+			br
+			echo "Пользователь $login был успешно добавлен в файл настроек"
+			wait
+	    ;;
+	    6) #Поменять MTU для интерфейса
+		    echo 'На каком интерфейсе вы хотите поменять mtu? (обычно на VPS это venet0:0 или eth0)'
+		    read interface
+		    echo 'Какой mtu установить?'
+		    read mtu
+		    mtu_change $interface $mtu
+		    echo 'Для интерфейса '$interface' был успешно установлен MTU '$mtu
+		    wait
+	    ;;
+	    7) #Перезапустить сервис Proxy (Squid)
+		    service squid restart
+		    echo 'Готово'
+		    wait
+	    ;;
+	    0)
+	    	chosen5=0
+	    ;;
+	    *)
+	    	echo "Неправильный выбор"
+	    	wait
+	    ;;
+	    esac
+	;;
+    2) #Dante (SOCKS5)
+		chosen5=2
+    	my_clear
+    	echo "$title"
+    	echo "$menu52"
+    	myread_dig pick
+    	case "$pick" in
+    	0)
+	    	chosen5=0
+	    ;;
+	    *)
+	    	echo "Неправильный выбор"
+	    	wait
+	    ;;
+	    esac
+	;;
+	0)
+		chosen=0
+	;;
 	esac
-    ;;
-    3) #Поменять MTU для интерфейса
-    echo 'На каком интерфейсе вы хотите поменять mtu? (обычно на VPS это venet0:0 или eth0)'
-    read interface
-    echo 'Какой mtu установить?'
-    read mtu
-    mtu_change $interface $mtu
-    echo 'Для интерфейса '$interface' был успешно установлен MTU '$mtu
-    wait
-    ;;
-    4) #Открыть файл настроек Squid
-    edit /etc/squid/squid.conf
-    ;;
-    5) #Добавить пользователей Proxy
-	br
-	case "$osver1" in
-		4|5)
-			installed htpasswd
-			if [ $exist == false ]; then yum -y install httpd; fi #устанавливаем httpd ради htpasswd, если её ещё нет
-		;;
-		6|7)
-			installed htpasswd
-			if [ $exist == false ]; then yum -y install httpd-tools; fi #устанавливаем утилиту htpasswd, если её нет
-		;;
-	esac
-	br
-	echo "Укажите логин пользователя:"
-	read login
-	login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
-	htpasswd /etc/squid/internet_users $login_lower    
-	br
-	echo "Пользователь $login был успешно добавлен в файл настроек"
-	wait
-    ;;
-    6) #Открыть файл с логинами/паролями пользователей Proxy
-    my_clear
-    br
-    echo "ВНИМАНИЕ! В этом файле содержатся не пароли пользователей, а их хэш-суммы!"
-    echo "Редактировать пароли в этом файле нельзя! Вы можете отредактировать только логин."
-	echo "Из этого файла Вы можете просто посмотреть какие у Вас есть пользователи и можете удалить кого-то."
-	echo "Для удаления пользователя просто сотрите соответствующую строку и сохраните файл."
-    echo "Если нужно изменить пароль - просто создайте заново пользователя с тем же логином."
-    br
-    wait
-    edit /etc/squid/internet_users
-    ;;    
-    7) #Перезапустить сервис Proxy (Squid)
-    service squid restart
-    echo 'Готово'
-    wait
-    ;;
-    0)
-    chosen=0
-    ;;
-    *)
-    echo "Неправильный выбор"
-    wait
-    ;;
-    esac
+
+
 ;;
 6) #Работа с файлами и программами
 chosen=6
