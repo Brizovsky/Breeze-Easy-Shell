@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.10.0 Beta 1"
+ver="v1.10.0 Beta 2"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -54,13 +54,13 @@ echo -e "$textcolor$bgcolor"
 clear
 }
 
-#функция, которая запрашивает только один символ
+#функция, которая запрашивает значение переменной, но с защитой от пустых значений
 myread()
 {
 temp=""
 while [ -z "$temp" ] #защита от пустых значений
 do
-read -n 1 temp
+read temp
 done
 eval $1=$temp
 echo
@@ -82,14 +82,13 @@ eval $1=$temp
 #функция, которая запрашивает только цифру
 myread_dig()
 {
-temp=""
-counter=0
-while [[ "$temp" != "0" && "$temp" != "1" && "$temp" != "2" && "$temp" != "3" && "$temp" != "4" && "$temp" != "5" && "$temp" != "6" && "$temp" != "7" && "$temp" != "8" && "$temp" != "9" ]] #запрашиваем значение, пока не будет цифра
-do
-if [ $counter -ne 0 ]; then echo -n "Неправильный выбор. Ведите цифру: "; fi
-let "counter=$counter+1"
 read -n 1 temp
 echo
+while [[ "$temp" != "0" && "$temp" != "1" && "$temp" != "2" && "$temp" != "3" && "$temp" != "4" && "$temp" != "5" && "$temp" != "6" && "$temp" != "7" && "$temp" != "8" && "$temp" != "9" ]] #запрашиваем значение, пока не будет цифра
+do
+	echo -n "Неправильный выбор. Ведите цифру: "
+	read -n 1 temp
+	echo
 done
 eval $1=$temp
 }
@@ -98,7 +97,7 @@ eval $1=$temp
 myinstall()
 {
 if [ -z `rpm -qa $1` ]; then
-	yum -y install $1
+	sudo yum -y install $1
 else
 	echo "Пакет $1 уже установлен"
 	br
@@ -365,7 +364,12 @@ if [ $osver1 -eq 7 ]; then
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
 else
-    if [ -n "$(ifconfig | grep venet0:0)" ]; then iface=venet0:0; fi
+    if [ -n "$(ifconfig | grep venet0:0)" ]; then iface="venet0:0"
+    else
+    	ip_line_num=$(ifconfig | grep -n $ipext | sed s/:.*//) #узнаем номер строки в котором светится наш IP
+    	let "if_line_num=$ip_line_num - 1" #название интерфейса будет в предыдущей строке
+    	iface="$(ifconfig | head -n $if_line_num | tail -n 1 | sed s/:.*//)"
+	fi
 fi
 }
 
@@ -390,57 +394,63 @@ esac
 #определяем внешний IP через запрос
 whatismyipext()
 {
-installed wget
-if [ $exist == false ]; then myinstall wget; fi
-ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
+if [[ "$ipext" = "" ]]; then
+	installed wget
+	if [ $exist == false ]; then myinstall wget; fi
+	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
+	if [[ "$ipext" = "" ]]; then
+		echo "Не удалось определить внешний IP. Введите его вручную:"
+		read ipext
+	fi
+fi
 }
 
-whatismyip_full()
-{
-whatismyip
-echo "Ваш внешний IP: $ip?"
-myread_yn ans
-case "$ans" in
-  y|Y)
-  #ничего не делаем, выходим из case
-  ;;
-  n|N|т|Т)
-  echo "Если был неправильно определен IP, вы можете произвести настройку в ручном режиме."
-  echo "Для этого Вам нужно определить как называется Ваш сетевой интерфейс, через который Вы выходите в интернет."
-  echo "Если хотите вывести на экран все сетевые интерфейсы, чтобы определить какой из них внешний - нажмите 1."
-  myread ans
-  if [ "$ans" == "1" ]; then ifconfig; br; wait; fi
-  br
-  echo "Укажите название интерфейса, который имеет внешний IP (обычно eth0, venet0 или venet0:0)"
-  read int
-  ip=`ifconfig $int | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
-  #centOS7
-  if [ $osver1 -eq 7 ]; then ip=`ifconfig $int | grep 'inet' | sed q | awk {'print $2'}`; fi
-  echo "Ваш внешний IP: $ip?"
-  myread_yn ans
-  case "$ans" in
-    y|Y)
-    ;;
-    n|N|т|Т)
-    echo "Тогда введите IP вручную:"
-    read ip
-    ;;
-    *)
-    echo "Неправильный ответ. Выходим."
-    wait
-    sh $0
-    exit 0
-    ;;
-  esac
-  ;;
-  *)
-  echo "Неправильный ответ. Выходим."
-  wait
-  sh $0
-  exit 0
-  ;;
-esac
-}
+#whatismyip_full()
+#{
+#whatismyip
+#echo "Ваш внешний IP: $ip?"
+#myread_yn ans
+#case "$ans" in
+#  y|Y)
+#  #ничего не делаем, выходим из case
+#  ;;
+#  n|N|т|Т)
+#  echo "Если был неправильно определен IP, вы можете произвести настройку в ручном режиме."
+#  echo "Для этого Вам нужно определить как называется Ваш сетевой интерфейс, через который Вы выходите в интернет."
+#  echo "Если хотите вывести на экран все сетевые интерфейсы, чтобы определить какой из них внешний - нажмите 1."
+#  myread ans
+#  if [ "$ans" == "1" ]; then ifconfig; br; wait; fi
+#  br
+#  echo "Укажите название интерфейса, который имеет внешний IP (обычно eth0, venet0 или venet0:0)"
+#  read int
+#  ip=`ifconfig $int | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
+#  #centOS7
+#  if [ $osver1 -eq 7 ]; then ip=`ifconfig $int | grep 'inet' | sed q | awk {'print $2'}`; fi
+#  echo "Ваш внешний IP: $ip?"
+#  myread_yn ans
+#  case "$ans" in
+#    y|Y)
+#    ;;
+#    n|N|т|Т)
+#    echo "Тогда введите IP вручную:"
+#    read ip
+#    ;;
+#    *)
+#    echo "Неправильный ответ. Выходим."
+#    wait
+#    sh $0
+#    exit 0
+#    ;;
+#  esac
+#  ;;
+#  *)
+#  echo "Неправильный ответ. Выходим."
+#  wait
+#  sh $0
+#  exit 0
+#  ;;
+#esac
+#}
 
 bench_cpu () {
 threads=$cpu_cores #делаем кол-во потоков, равное кол-ву ядер
@@ -881,7 +891,7 @@ menu51="
 menu52="
 ● Работа с Proxy:
 │
-└─● Dante Server (SOCKS5):
+└─● Dante (SOCKS5):
   │ ┌───┬────────────────────────────────────────┐
   ├─┤ 1 │ Установить Dante (SOCKS5 Proxy-сервер) │
   │ ├───┼────────────────────────────────────────┤
@@ -889,13 +899,15 @@ menu52="
   │ ├───┼────────────────────────────────────────┤
   ├─┤ 3 │ Открыть файл настроек Dante            │
   │ ├───┼────────────────────────────────────────┤
-  ├─┤ 4 │ Открыть файл с логинами пользователей  │
+  ├─┤ 4 │ Показать список пользователей          │
   │ ├───┼────────────────────────────────────────┤
   ├─┤ 5 │ Добавить пользователя                  │
   │ ├───┼────────────────────────────────────────┤
-  ├─┤ 6 │ Удалить пользователя                   │
+  ├─┤ 6 │ Поменять пароль пользователя           │
   │ ├───┼────────────────────────────────────────┤
-  ├─┤ 7 │ Перезапустить сервис Dante             │
+  ├─┤ 7 │ Удалить пользователя                   │
+  │ ├───┼────────────────────────────────────────┤
+  ├─┤ 8 │ Перезапустить сервис Dante             │
   │ ├───┼────────────────────────────────────────┤
   └─┤ 0 │ Выйти на уровень вверх                 │
     └───┴────────────────────────────────────────┘
@@ -1233,12 +1245,12 @@ fi
         myread_yn ans
         case "$ans" in
           y|Y)
-          whatismyip_full
+          whatismyipext
           iptables -A INPUT -p 47 -j ACCEPT
           iptables -A OUTPUT -p 47 -j ACCEPT
           iptables -A INPUT -p tcp --dport 1723 -j ACCEPT
           iptables -A OUTPUT -p tcp --sport 1723 -j ACCEPT
-          iptables -t nat -I POSTROUTING -j SNAT --to $ip
+          iptables -t nat -I POSTROUTING -j SNAT --to $ipext
           iptables -A FORWARD -s 10.1.0.0/24 -j ACCEPT
           iptables -A FORWARD -d 10.1.0.0/24 -j ACCEPT
           ;;
@@ -2023,7 +2035,7 @@ myread_dig pick
         #yum update -y
         yum -y install ppp pptpd pptp
         br
-        whatismyip_full
+        whatismyipext
           #открываем порты и настраиваем маршрутизацию
           br
           echo "Открываем порты в firewall для работы VPN"
@@ -2032,7 +2044,7 @@ myread_dig pick
             iptables -I OUTPUT -p 47 -j ACCEPT
 			openport in tcp 1723
 			openport out tcp 1723
-            iptables -t nat -I POSTROUTING -j SNAT --to $ip
+            iptables -t nat -I POSTROUTING -j SNAT --to $ipext
             iptables -I FORWARD -s 10.1.0.0/24 -j ACCEPT
             iptables -I FORWARD -d 10.1.0.0/24 -j ACCEPT
           #теперь делаем так, чтобы сохранились правила после перезагрузки
@@ -2092,7 +2104,7 @@ END
           if [ $osver1 -eq 7 ]; then systemctl start pptpd; systemctl enable pptpd.service; fi
           br
           echo "Настройка вашего собственного VPN завершена!"
-          echo "Ваш IP: $ip? логин и пароль:"
+          echo "Ваш IP: $ipext"
           echo "Имя пользователя (логин):$u ##### Пароль: $p"
           br
           wait
@@ -2114,12 +2126,12 @@ END
     edit /etc/ppp/chap-secrets
     ;;
     4) #Добавить правила для работы VPN в IPTables
-    whatismyip_full    
+    whatismyipext    
     iptables -I INPUT -p 47 -j ACCEPT
     iptables -I OUTPUT -p 47 -j ACCEPT
 	openport in tcp 1723
 	openport out tcp 1723
-    iptables -t nat -I POSTROUTING -j SNAT --to $ip
+    iptables -t nat -I POSTROUTING -j SNAT --to $ipext
     iptables -I FORWARD -s 10.1.0.0/24 -j ACCEPT
     iptables -I FORWARD -d 10.1.0.0/24 -j ACCEPT
     br
@@ -2240,7 +2252,7 @@ fi
 				if [ "$ncsa_path" == "" ]; then ncsa_path=$(find / -name "*ncsa_auth"); fi #если и теперь ncsa_auth не найден, пробуем искать другой ncsa_auth
 				br
 				echo "Укажите логин пользователя:"
-				read login
+				myread login
 				login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
 				htpasswd /etc/squid/internet_users $login_lower
 				echo "auth_param basic program $ncsa_path /etc/squid/internet_users " >> /etc/squid/squid.conf
@@ -2358,7 +2370,7 @@ END
 			esac
 			br
 			echo "Укажите логин пользователя:"
-			read login
+			myread login
 			login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
 			htpasswd /etc/squid/internet_users $login_lower    
 			br
@@ -2395,6 +2407,132 @@ END
     	echo "$menu52"
     	myread_dig pick
     	case "$pick" in
+    	1) #Установить Dante (SOCKS5 Proxy-сервер)
+			echo "Добавляем репозиторий GhettoForge..."
+			myinstall http://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el7.noarch.rpm #добавляем репозиторий с Dante
+			echo "Начинаем установку Dante..."
+			sudo yum --enablerepo=gf-plus install dante-server #устанавливаем Dante
+			mkdir /var/run/sockd #Создаём каталог для pid-файла
+			echo "Какой должна быть авторизация на прокси-сервере?"
+			echo "1) С авторизацией по логину/паролю"
+			echo "2) Без авторизации вообще"
+			myread_dig ans
+			while [[ $ans -ne 1 && $ans -ne 2 ]]; do
+				echo -n 'Неправильный ответ (выберите "1" или "2"): '
+				myread_dig ans
+				echo
+			done
+			if [[ $ans = 1 ]]; then #устанавливаем переменную в зависимости от выбора пользователя
+				socksmethod="username"
+			else
+				socksmethod="none"
+			fi
+			echo "На каком порту открываем Proxy-сервер (стандартный - 1080)?"
+			myread port
+			whatismyiface #нужно определить какой у нас внешний интерфейс
+#записываем конфиг
+cat > /etc/squid/squid.conf <<END
+user.privileged: root
+user.unprivileged: nobody
+
+# The listening network interface or address.
+internal: 0.0.0.0 port=$port
+#internal: 0.0.0.0 port=1080 # можно указать несколько портов, по умолчанию 1080
+
+# The proxying network interface or address.
+external: $iface
+
+logoutput: syslog stdout /var/log/sockd.log
+errorlog: /var/log/sockd_err.log
+# socks-rules determine what is proxied through the external interface.
+# The default of "none" permits anonymous access.
+socksmethod: username
+
+# client-rules determine who can connect to the internal interface.
+# The default of "none" permits anonymous access.
+clientmethod: none
+
+client pass {
+    from: 0.0.0.0/0 to: 0.0.0.0/0
+    log: connect disconnect error
+}
+  
+socks pass {
+    from: 0.0.0.0/0 to: 0.0.0.0/0
+    log: connect disconnect error
+}
+END
+#упаковал в функцию добавлению юзера
+add_user_socks5()
+{
+			echo "Укажите логин пользователя:"
+			myread login
+			#login_lower=$(echo $login | tr [:upper:] [:lower:]) #Перевели логин в нижний регстр, без этого авторизация вообще не будет проходить
+			useradd --shell /usr/sbin/nologin $login #создаем системного пользователя без права входить по ssh
+			passwd $login
+}
+			br
+			add_user_socks5
+			br
+			echo "Открываем порт $port для прокси-сервера..."
+			openport in tcp $port #открываем порт для Прокси
+			br
+			echo "Запускаем север..."
+			systemctl start sockd.service
+			br
+			echo "Ставим сервис в автозагрузку..."
+			systemctl enable sockd.service
+			br
+			echo "установка SOCKS5 Proxy завершена."
+		    echo "Параметры вашего Proxy:"
+		    echo "IP: $ipext"
+		    echo "Порт: $port"
+		    echo "Пользователь: $login"
+		    br
+		    wait
+		;;
+		2) #Удалить Dante
+			my_clear
+			uninstall dante-server
+			echo "Удаление Dante завершено..."
+			wait
+		;;
+		3) #Открыть файл настроек Dante
+			edit /etc/sockd.conf
+		;;
+		4) #Показать список пользователей
+			my_clear
+			cat /etc/passwd | grep /usr/sbin/nologin | sed 's/:.*//'
+			br
+			wait
+		;;
+		5) #Добавить пользователя
+			my_clear
+			add_user_socks5
+			br
+			echo "Готово..."
+			wait
+		;;
+		6) #Поменять пароль пользователя
+			my_clear
+			echo "Укажите логин пользователя, пароль которого хотите поменять:"
+			myread login
+			passwd $login			
+			br
+			echo "Пароль поменян..."
+			wait
+		;;
+		7) #Удалить пользователя
+			my_clear
+			echo "Укажите логин пользователя, которого вы хотите удалить:"
+			myread login
+		;;
+		8) #Перезапустить сервис Dante
+			my_clear
+			echo "перезапускаем сервер..."
+			systemctl restart sockd.service
+			wait
+		;;
     	0)
 	    	chosen5=0
 	    ;;
@@ -2420,7 +2558,7 @@ myread_dig pick
     case "$pick" in
     1) #Установить какую-либо программу
     echo "Укажите название пакета который нужно установить"
-    read answer
+    myread answer
     yum -y install $answer
     br
     echo "Готово."
@@ -2428,7 +2566,7 @@ myread_dig pick
     ;;
     2) #Удалить какую-либо программу
     echo "Укажите название пакета который нужно удалить"
-    read answer
+    myread answer
     yum erase $answer
     br
     echo "Готово."
@@ -2439,7 +2577,7 @@ myread_dig pick
     if [ $osver1 -eq 5 ]; then echo "Данная функция не поддерживается на CentOS 5.x"; wait
     else
         echo "Укажите название пакета который нужно полностью удалить"
-        read answer
+        myread answer
         uninstall $answer
         br
         echo "Готово."
@@ -2510,7 +2648,7 @@ myread_dig pick
     3) #Удалить логи Apache конкретного пользователя
     br
     echo "Введите логин ispmanager (обычно в нижнем регистре!) для удаления его старых логов:"
-    read answer
+    myread answer
     rm -f /var/www/$answer/data/logs/*.gz
     br
     echo "Готово."
@@ -2543,7 +2681,7 @@ echo 'Такие как: myinstall, uninstall, openport, changelog, updatescript
 echo 'Для выхода из терминала наберите "exit" или "quit".'
 br
 echo "Введите команду:"
-read cmd
+myread cmd
 if [[ "$cmd" == "exit" || "$cmd" == "quit" ]]
 then
   chosen=0
