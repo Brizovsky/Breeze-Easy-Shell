@@ -1,5 +1,5 @@
 #!/bin/bash
-ver="v1.10.0 Beta 6"
+ver="v1.10.0 Beta 8"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 #-----------------
@@ -374,7 +374,7 @@ fi
 whatismyiface()
 {
 if [ $osver1 -eq 7 ]; then #если это centos, то там нет ifconfig, нужно ставить
-  if [ -z $(ifconfig) ]; then yum -y install net-tools | tee > /dev/null; fi #если ifconfig пустой, значит нет ifconfig и нужно установить net-tools
+  if [[ -z $(ifconfig) ]]; then yum -y install net-tools | tee > /dev/null; fi #если ifconfig пустой, значит нет ifconfig и нужно установить net-tools
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
 else
@@ -2449,8 +2449,10 @@ END
 			br
 			echo "Начинаем установку Dante..."
 			sudo yum --enablerepo=gf-plus install dante-server -y #устанавливаем Dante
-			mkdir /var/run/sockd #Создаём каталог для pid-файла
+			if ! [ -d /var/run/sockd/ ]; then mkdir /var/run/sockd; fi #Создаём каталог для pid-файла, но только если еще не создан
 			br
+			echo "На каком порту открываем Proxy-сервер (стандартный - 1080)?"
+			myread port
 			echo "Какой должна быть авторизация на прокси-сервере?"
 			echo "1) С авторизацией по логину/паролю"
 			echo "2) Без авторизации вообще"
@@ -2465,9 +2467,6 @@ END
 			else
 				socksmethod="none"
 			fi
-			br
-			echo "На каком порту открываем Proxy-сервер (стандартный - 1080)?"
-			myread port
 			whatismyiface #нужно определить какой у нас внешний интерфейс
 #записываем конфиг
 cat > /etc/sockd.conf <<END
