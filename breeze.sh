@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 RC1"
+ver="v1.10.0 Beta 17"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -160,7 +160,7 @@ read -s -n 1
 
 br()
 {
-echo ""
+echo -e "$textcolor$bgcolor"
 }
 
 updatescript()
@@ -401,7 +401,8 @@ whatismyipext()
 if [[ "$ipext" = "" ]]; then
 	installed wget
 	if [ $exist == false ]; then myinstall wget; fi
-	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
+	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "return" | sed q | awk {'print $2'} | sed -e "s/'//g"`
+	if [ ${#ipext} -lt 7 ]; then ipext=""; fi #если длина ipext меньше 7 символов, то обнуляем его, потому что там что попало
 	if [[ "$ipext" = "" ]]; then
 		echo "Не удалось определить внешний IP. Введите его вручную (можете оставить пустым, но при этом неправильно будет работать часть функционала):"
 		read ipext
@@ -2453,7 +2454,6 @@ END
     	1) #Установить Dante (SOCKS5 Proxy-сервер)
 			echo "Добавляем репозиторий GhettoForge..."
 			myinstall http://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el7.noarch.rpm #добавляем репозиторий с Dante
-			echo -e "$textcolor$bgcolor"
 			br
 			echo "Начинаем установку Dante..."
 			sudo yum --enablerepo=gf-plus install dante-server -y #устанавливаем Dante
@@ -2516,7 +2516,6 @@ END
 			echo "Открываем порт $port для прокси-сервера..."
 			openport in tcp $port #открываем порт для Прокси
 			br
-			echo -e "$textcolor$bgcolor"
 			echo "Запускаем север..."
 			service sockd.service start
 			br
