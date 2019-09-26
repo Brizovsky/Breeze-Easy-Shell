@@ -1,10 +1,15 @@
 #!/bin/bash
-ver="v1.10.0 Beta 9"
+
+#--------------------------------------------------------
+# Базовые переменные
+#--------------------------------------------------------
+
+ver="v1.10.0 RC1"
 title="Breeze Easy Shell"
 title_full="$title $ver"
-#-----------------
-#типовые функции
-#-----------------
+filename='breeze.sh'
+#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master' #релиз
+updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
 
 #для рабты с цветами
 normal="\033[0m"
@@ -14,6 +19,26 @@ blue="\033[1;34m"
 black="\033[40m"
 textcolor=$green
 bgcolor=$black
+
+#Определяем ОС
+if [ "$(cat /etc/redhat-release | awk {'print $2'})" == "release" ]
+then
+  osfamily=$(cat /etc/redhat-release | awk {'print $1'})
+  osver2=$(cat /etc/redhat-release | awk {'print $3'})
+else
+  if [ "$(cat /etc/redhat-release | awk {'print $3'})" == "release" ]
+    then
+    osfamily=$(cat /etc/redhat-release | awk {'print $1'})" "$(cat /etc/redhat-release | awk {'print $2'})
+    osver2=$(cat /etc/redhat-release | awk {'print $4'})
+  else osver2=0
+  fi
+fi
+osver1=`echo $osver2 | cut -c 1` #берём только первый символ от версии для определения поколения
+if [ "$osfamily" == "CentOS Linux" ]; then osfamily="CentOS"; fi
+
+#--------------------------------------------------------
+# Функции
+#--------------------------------------------------------
 
 #добавление юзера для Dante
 add_user_socks5()
@@ -370,10 +395,25 @@ yum --remove-leaves remove $1 $2 $3 $4 $5
 fi
 }
 
+#определяем внешний IP через запрос
+whatismyipext()
+{
+if [[ "$ipext" = "" ]]; then
+	installed wget
+	if [ $exist == false ]; then myinstall wget; fi
+	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
+	if [[ "$ipext" = "" ]]; then
+		echo "Не удалось определить внешний IP. Введите его вручную (можете оставить пустым, но при этом неправильно будет работать часть функционала):"
+		read ipext
+	fi
+fi
+}
+
 #Определяем активный внешний интерфейс
 whatismyiface()
 {
-if [ $osver1 -eq 7 ]; then #если это centos, то там нет ifconfig, нужно ставить
+whatismyipext #нужно обязательно сначала узнать ip
+if [ $osver1 -eq 7 ]; then #если это centos 7, то там нет ifconfig, нужно ставить
   if [[ -z $(ifconfig) ]]; then yum -y install net-tools | tee > /dev/null; fi #если ifconfig пустой, значит нет ifconfig и нужно установить net-tools
 fi
 if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
@@ -381,8 +421,8 @@ else
     if [ -n "$(ifconfig | grep venet0:0)" ]; then iface="venet0:0"
     else
     	ip_line_num=$(ifconfig | grep -n $ipext | sed s/:.*//) #узнаем номер строки в котором светится наш IP
-    	let "if_line_num=$ip_line_num - 1" #название интерфейса будет в предыдущей строке
-    	iface="$(ifconfig | head -n $if_line_num | tail -n 1 | sed s/:.*//)"
+    	let "iface_line_num=$ip_line_num - 1" #название интерфейса будет в предыдущей строке
+    	iface="$(ifconfig | head -n $iface_line_num | tail -n 1 | sed s/:.*//)"
 	fi
 fi
 }
@@ -404,67 +444,6 @@ wait
 ;;
 esac
 }
-
-#определяем внешний IP через запрос
-whatismyipext()
-{
-if [[ "$ipext" = "" ]]; then
-	installed wget
-	if [ $exist == false ]; then myinstall wget; fi
-	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
-	if [[ "$ipext" = "" ]]; then
-		echo "Не удалось определить внешний IP. Введите его вручную:"
-		read ipext
-	fi
-fi
-}
-
-#whatismyip_full()
-#{
-#whatismyip
-#echo "Ваш внешний IP: $ip?"
-#myread_yn ans
-#case "$ans" in
-#  y|Y)
-#  #ничего не делаем, выходим из case
-#  ;;
-#  n|N|т|Т)
-#  echo "Если был неправильно определен IP, вы можете произвести настройку в ручном режиме."
-#  echo "Для этого Вам нужно определить как называется Ваш сетевой интерфейс, через который Вы выходите в интернет."
-#  echo "Если хотите вывести на экран все сетевые интерфейсы, чтобы определить какой из них внешний - нажмите 1."
-#  myread ans
-#  if [ "$ans" == "1" ]; then ifconfig; br; wait; fi
-#  br
-#  echo "Укажите название интерфейса, который имеет внешний IP (обычно eth0, venet0 или venet0:0)"
-#  read int
-#  ip=`ifconfig $int | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
-#  #centOS7
-#  if [ $osver1 -eq 7 ]; then ip=`ifconfig $int | grep 'inet' | sed q | awk {'print $2'}`; fi
-#  echo "Ваш внешний IP: $ip?"
-#  myread_yn ans
-#  case "$ans" in
-#    y|Y)
-#    ;;
-#    n|N|т|Т)
-#    echo "Тогда введите IP вручную:"
-#    read ip
-#    ;;
-#    *)
-#    echo "Неправильный ответ. Выходим."
-#    wait
-#    sh $0
-#    exit 0
-#    ;;
-#  esac
-#  ;;
-#  *)
-#  echo "Неправильный ответ. Выходим."
-#  wait
-#  sh $0
-#  exit 0
-#  ;;
-#esac
-#}
 
 bench_cpu () {
 threads=$cpu_cores #делаем кол-во потоков, равное кол-ву ядер
@@ -497,7 +476,7 @@ case "$1" in
 		n=4
 	;;
 esac
-	disk_result=$(df | grep /dev/sd | awk '{print $'$n'}' | ( #берём только те строки, в которых есть /dev/sd и берем только нужный столбик в зависимости от переданного в функцию значения total/used/free
+	disk_result=$(df | grep / | awk '{print $'$n'}' | ( #берём в итоге все строки (можно брать только часть, если выставить /dev/ в grep) и берем только нужный столбик в зависимости от переданного в функцию значения total/used/free
 		sum=0 #обнуляем сумму
 		while read hdd #начинаем перебор, пока есть строки (на случай, если несколько винтов)
 		do
@@ -574,10 +553,13 @@ bench_hdd () {
 
 showinfo()
 {
+cpu
+whatismyip
 echo "┌──────────────────────────────────────────────────────────────┐"
 echo "│                     Информация о системе                     │"
 echo "└──────────────────────────────────────────────────────────────┘"
-echo "                            CPU: $cpu_cores x $cpu_clock MHz ($cpu_model)"
+echo "                      CPU Cores: $cpu_cores x $cpu_clock MHz (max $cpu_clock_max MHz)"
+echo "                      CPU Model: $cpu_model"
 if [ $swap_mb -eq 0 ]; then echo "                            RAM: $mem_mb Mb"; else
 echo "                            RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"; fi
 #Определяем диск (делаем это при каждом выводе, т.к. данные меняются)
@@ -587,20 +569,30 @@ disk free
 hdd_free=$disk_result
 let "hdd_total_mb=$hdd_total / 1024"
 let "hdd_free_mb=$hdd_free / 1024"
+if [ $hdd_total_mb -ge 100000 ]
+then
+	let "hdd_total_gb1=$hdd_total_mb / 1024"
+	let "hdd_total_gb2=$hdd_total_mb * 100 / 1024 - $hdd_total_gb1 * 100"
+	let "hdd_free_gb1=$hdd_free_mb / 1024"
+	let "hdd_free_gb2=$hdd_free_mb * 100 / 1024 - $hdd_free_gb1 * 100"
+fi
 #Определяем uptime системы (делаем это при каждом выводе)
 uptime=$(uptime | sed -e "s/ * / /g") #сразу берем аптайм без двойных пробелов
 uptime=$(echo "${uptime%,* user*}")
 uptime=$(echo "${uptime#*up }")
-echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
+if [ $hdd_total_mb -ge 100000 ]
+then
+	echo "                            HDD: $hdd_total_gb1,$hdd_total_gb2 Gb (свободно $hdd_free_gb1,$hdd_free_gb2 Gb)"
+else
+	echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"	
+fi
 echo "                             ОС: $osfamily $osver2"
 echo "                 Разрядность ОС: $arc bit"
 echo "              Версия ядра Linux: $kern"
 echo "                 Аптайм системы: $uptime"
-if [ ${#iface} -eq 4 ]; then #проверяем какой сетевой интерфейс. Если мы его не определили, то вообще не выводим эту строку
-echo "      Ваш IP на интерфейсе $iface: $ip"; fi #длина строки подобрана под eth0
-if [ ${#iface} -eq 8 ]; then
-echo "  Ваш IP на интерфейсе $iface: $ip"; fi #длина строки подобрана под venet0:0
-if [[ "$ipext" != "" ]]; then
+echo "$space3Ваш IP на интерфейсе $iface: $ip" #длина строки скорректирована под длину название iface
+if [[ "$ipext" != "" ]] #если внешний ip определен, то показываем его.
+ then
  	echo "Ваш внешний IP определяется как: $ipext"
 fi 
 }
@@ -640,12 +632,16 @@ sh $0
 exit
 }
 
-#-----------------
-#задаем переменные
-#-----------------
-#Задаём переменную с нужным количеством пробелов, чтобы меню не разъезжалось от смены версии
+#--------------------------------------------------------
+# Рассчетные переменные
+#--------------------------------------------------------
+
+#Задаём переменную с нужным количеством пробелов, чтобы меню не разъезжалось от разной длины текстовых полей
 title_full_len=${#title_full}
 title_len=${#title}
+whatismyiface #нужно прогнать функцию, чтобы определить значение ipext
+iface_len=${#iface}
+
 space=""
       let "space_len=43-$title_full_len" 
       while [ "${#space}" -le $space_len ]
@@ -660,9 +656,12 @@ space2=""
       space2=$space2" "
       done
 
-filename='breeze.sh'
-#updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/master' #релиз
-updpath='https://raw.githubusercontent.com/Brizovsky/Breeze-Easy-Shell/beta' #бета
+space3=""
+      let "space3_len=10-$iface_len" 
+      while [ "${#space3}" -lt $space3_len ]
+      do
+      space3=$space3" "
+      done
 
 #определяем сколько RAM
 mem_total=`cat /proc/meminfo | grep MemTotal | awk '{print $2}'`
@@ -671,29 +670,17 @@ let "mem_mb=$mem_total / 1024"
 let "swap_mb=$swap_total / 1024"
 
 #Определяем данные процессора
-cpu_clock=`cat /proc/cpuinfo | grep "cpu MHz" | awk {'print $4'} | sed q`
+cpu() #упаковал в функцию, чтобы каждый раз перечитывать значения
+{
+cpu_clock=`lscpu | grep "CPU MHz" | awk {'print $3'}`
 let "cpu_clock=$(printf %.0f $cpu_clock)"
-#cpu_cores=`cat /proc/cpuinfo | grep "cpu cores" | awk {'print $4'}`
+}
+cpu_clock_max=`lscpu | grep "CPU max MHz" | awk {'print $4'}`
+let "cpu_clock_max=$(printf %.0f $cpu_clock_max)"
 cpu_cores=`grep -o "processor" <<< "$(cat /proc/cpuinfo)" | wc -l`
 cpu_model=`cat /proc/cpuinfo | grep "model name" | sed q | sed -e "s/model name//" | sed -e "s/://" | sed -e 's/^[ \t]*//' | sed -e "s/(tm)/™/g" | sed -e "s/(C)/©/g" | sed -e "s/(R)/®/g"`
 #уберём двойные пробелы:
 cpu_model=`echo $cpu_model | sed -e "s/ * / /g"`
-
-#Определяем ОС
-if [ "$(cat /etc/redhat-release | awk {'print $2'})" == "release" ]
-then
-  osfamily=$(cat /etc/redhat-release | awk {'print $1'})
-  osver2=$(cat /etc/redhat-release | awk {'print $3'})
-else
-  if [ "$(cat /etc/redhat-release | awk {'print $3'})" == "release" ]
-    then
-    osfamily=$(cat /etc/redhat-release | awk {'print $1'})" "$(cat /etc/redhat-release | awk {'print $2'})
-    osver2=$(cat /etc/redhat-release | awk {'print $4'})
-  else osver2=0
-  fi
-fi
-osver1=`echo $osver2 | cut -c 1` #берём только первый символ от версии для определения поколения
-if [ "$osfamily" == "CentOS Linux" ]; then osfamily="CentOS"; fi
 
 #Определяем разрядность ОС
 arc=`arch`
@@ -703,6 +690,10 @@ fi
 
 #определяем версию ядра Linux
 kern=`uname -r | sed -e "s/-/ /" | awk {'print $1'}`
+
+#--------------------------------------------------------
+#Переменные с меню
+#--------------------------------------------------------
 
 menu="
 ┌─────────────────────────────────────────────┐
@@ -989,9 +980,10 @@ menu7="
   └───┴─────────────────────────────────────────────────┘
 "
 
-#-----------------
+#--------------------------------------------------------
 #Интерфейс
-#-----------------
+#--------------------------------------------------------
+
 repeat=true
 chosen=0
 chosen2=0
@@ -1016,16 +1008,6 @@ echo "$menu1"
 myread_dig pick
     case "$pick" in
     1) #Показать общую информацию о системе
-		my_clear
-		showinfo
-		br
-		echo "Вычисляем Ваш IP на интерфейсе..."
-		whatismyip
-		my_clear
-		showinfo
-		br
-		echo "Вычисляем Ваш внешний IP..."
-		whatismyipext
 		my_clear
 		showinfo
 		br
