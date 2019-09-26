@@ -573,8 +573,10 @@ if [ $hdd_total_mb -ge 100000 ]
 then
 	let "hdd_total_gb1=$hdd_total_mb / 1024"
 	let "hdd_total_gb2=$hdd_total_mb * 100 / 1024 - $hdd_total_gb1 * 100"
+	if [ "${#hdd_total_gb2}" = 1 ]; then hdd_total_gb2="0${hdd_total_gb2}"; fi
 	let "hdd_free_gb1=$hdd_free_mb / 1024"
 	let "hdd_free_gb2=$hdd_free_mb * 100 / 1024 - $hdd_free_gb1 * 100"
+	if [ "${#hdd_free_gb2}" = 1 ]; then hdd_free_gb2="0${hdd_free_gb2}"; fi
 fi
 #Определяем uptime системы (делаем это при каждом выводе)
 uptime=$(uptime | sed -e "s/ * / /g") #сразу берем аптайм без двойных пробелов
