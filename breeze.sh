@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 17"
+ver="v1.10.0 Beta 21"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -413,7 +413,6 @@ fi
 #Определяем активный внешний интерфейс
 whatismyiface()
 {
-whatismyipext #нужно обязательно сначала узнать ip
 if [ $osver1 -eq 7 ]; then #если это centos 7, то там нет ifconfig, нужно ставить
   if [[ -z $(ifconfig) ]]; then yum -y install net-tools | tee > /dev/null; fi #если ifconfig пустой, значит нет ifconfig и нужно установить net-tools
 fi
@@ -421,6 +420,7 @@ if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
 else
     if [ -n "$(ifconfig | grep venet0:0)" ]; then iface="venet0:0"
     else
+    	whatismyipext #нужно обязательно сначала узнать ip
     	ip_line_num=$(ifconfig | grep -n $ipext | sed s/:.*//) #узнаем номер строки в котором светится наш IP
     	let "iface_line_num=$ip_line_num - 1" #название интерфейса будет в предыдущей строке
     	iface="$(ifconfig | head -n $iface_line_num | tail -n 1 | sed s/:.*//)"
@@ -593,7 +593,10 @@ echo "                             ОС: $osfamily $osver2"
 echo "                 Разрядность ОС: $arc bit"
 echo "              Версия ядра Linux: $kern"
 echo "                 Аптайм системы: $uptime"
-echo "$space3Ваш IP на интерфейсе $iface: $ip" #длина строки скорректирована под длину название iface
+if [[ "$iface" != "" ]] #если интерфейс известен, то показываем
+then
+	echo "$space3Ваш IP на интерфейсе $iface: $ip" #длина строки скорректирована под длину название iface
+fi
 if [[ "$ipext" != "" ]] #если внешний ip определен, то показываем его.
  then
  	echo "Ваш внешний IP определяется как: $ipext"
@@ -642,8 +645,6 @@ exit
 #Задаём переменную с нужным количеством пробелов, чтобы меню не разъезжалось от разной длины текстовых полей
 title_full_len=${#title_full}
 title_len=${#title}
-whatismyiface #нужно прогнать функцию, чтобы определить значение ipext
-iface_len=${#iface}
 
 space=""
       let "space_len=43-$title_full_len" 
@@ -657,13 +658,6 @@ space2=""
       while [ "${#space2}" -le $space2_len ]
       do
       space2=$space2" "
-      done
-
-space3=""
-      let "space3_len=10-$iface_len" 
-      while [ "${#space3}" -lt $space3_len ]
-      do
-      space3=$space3" "
       done
 
 #определяем сколько RAM
@@ -788,7 +782,7 @@ menu25="
   │ ┌───┬───────────────────────────────────────────────┐
   ├─┤ 1 │ Включить firewall (помощник настройки)        │
   │ ├───┼───────────────────────────────────────────────┤
-  ├─┤ 2 │ Отключить firewall (рарешить все подключения) │
+  ├─┤ 2 │ Отключить firewall (разрешить все подключения)│
   │ ├───┼───────────────────────────────────────────────┤
   ├─┤ 3 │ Временно выключить firewall                   │
   │ ├───┼───────────────────────────────────────────────┤
@@ -1012,7 +1006,17 @@ myread_dig pick
     case "$pick" in
     1) #Показать общую информацию о системе
 		my_clear
-		showinfo
+		showinfo #сначала показываем что есть
+		whatismyiface #потом узнаем ip, интерфейс
+		iface_len=${#iface}
+		space3=""
+      	let "space3_len=10-$iface_len" 
+      	while [ "${#space3}" -lt $space3_len ]
+      	do
+      	space3=$space3" "
+      	done
+		my_clear
+		showinfo #и отрисовываем ещё раз уже полностью
 		br
 		wait
     ;;
@@ -1294,7 +1298,7 @@ fi
         ;;
       esac
       ;;
-      2) #Выключить firewall (рарешить все подключения)
+      2) #Выключить firewall (разрешить все подключения)
 	  echo "Сейчас будут удалены все правила iptables, после чего будут разрешены все подключения. Продолжить?"
       myread_yn ans
       case "$ans" in
@@ -2076,7 +2080,6 @@ myread_dig pick
         echo "установка PPTP"
         #CentOS 5
         if [ $osver1 -eq 5 ]; then rpm -Uvh http://pptpclient.sourceforge.net/yum/stable/rhel5/pptp-release-current.noarch.rpm; fi
-        #yum update -y
         yum -y install ppp pptpd pptp
         br
         whatismyipext
@@ -2120,7 +2123,7 @@ END
           # setting up pptpd.conf
           echo "option /etc/ppp/pptpd-options" > /etc/pptpd.conf
           echo "logwtmp" >> /etc/pptpd.conf
-          echo "localip $ip" >> /etc/pptpd.conf
+          echo "localip $ipext" >> /etc/pptpd.conf
           echo "remoteip 10.1.0.1-100" >> /etc/pptpd.conf
           #autostart pptpd
           chkconfig pptpd on          
@@ -2196,9 +2199,17 @@ END
     myread_yn ans
     case "$ans" in
     y|Y)
+    echo "Начинаем удалять VPN-сервер"
+    whatismyipext
     uninstall -y pptpd pptp
     rm -f /etc/ppp/chap-secrets
     rm -f /etc/pptpd.conf
+    iptables -D INPUT -p 47 -j ACCEPT
+    iptables -D OUTPUT -p 47 -j ACCEPT
+    iptables -t nat -D POSTROUTING -j SNAT --to $ipext
+    iptables -D FORWARD -s 10.1.0.0/24 -j ACCEPT
+    iptables -D FORWARD -d 10.1.0.0/24 -j ACCEPT
+    iptables_save
     sed -i -e '/ifconfig ppp0 mtu 1400/d' /etc/ppp/ip-up #Удаляем строки, которые добавляли
     sed -i -e '/ifconfig ppp1 mtu 1400/d' /etc/ppp/ip-up #Удаляем строки, которые добавляли
     sed -i -e '/ifconfig ppp2 mtu 1400/d' /etc/ppp/ip-up #Удаляем строки, которые добавляли
@@ -2209,6 +2220,7 @@ END
     sed -i -e '/ifconfig ppp7 mtu 1400/d' /etc/ppp/ip-up #Удаляем строки, которые добавляли
     sed -i -e '/ifconfig ppp8 mtu 1400/d' /etc/ppp/ip-up #Удаляем строки, которые добавляли
     sed -i -e '/ifconfig ppp9 mtu 1400/d' /etc/ppp/ip-up #Удаляем строки, которые добавляли
+	br
 	echo "Готово."
 	br
 	wait
