@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 22"
+ver="v1.10.0 Beta 24"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -559,7 +559,8 @@ whatismyip
 echo "┌──────────────────────────────────────────────────────────────┐"
 echo "│                     Информация о системе                     │"
 echo "└──────────────────────────────────────────────────────────────┘"
-echo "                      CPU Cores: $cpu_cores x $cpu_clock MHz (max $cpu_clock_max MHz)"
+echo "                      CPU Cores: $cpu_cores x $cpu_clock MHz"
+if [ $cpu_clock_max -ne 0 ]; then echo -n " (max $cpu_clock_max MHz)"; fi #выводим только если есть CPU max
 echo "                      CPU Model: $cpu_model"
 if [ $swap_mb -eq 0 ]; then echo "                            RAM: $mem_mb Mb"; else
 echo "                            RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"; fi
@@ -672,10 +673,11 @@ let "swap_mb=$swap_total / 1024"
 cpu() #упаковал в функцию, чтобы каждый раз перечитывать значения
 {
 cpu_clock=`lscpu | grep "CPU MHz" | awk {'print $3'}`
-let "cpu_clock=$(printf %.0f $cpu_clock)"
+cpu_clock=$(printf %.0f $cpu_clock)
+cpu_clock_max=`lscpu | grep "CPU max MHz" | awk {'print $4'}` #тут может быть пустая строка, если нет значения CPU max
+cpu_clock_max=$(printf %.0f $cpu_clock_max) #тут может получиться ноль, если строка была пустой
 }
-cpu_clock_max=`lscpu | grep "CPU max MHz" | awk {'print $4'}`
-let "cpu_clock_max=$(printf %.0f $cpu_clock_max)"
+
 cpu_cores=`grep -o "processor" <<< "$(cat /proc/cpuinfo)" | wc -l`
 cpu_model=`cat /proc/cpuinfo | grep "model name" | sed q | sed -e "s/model name//" | sed -e "s/://" | sed -e 's/^[ \t]*//' | sed -e "s/(tm)/™/g" | sed -e "s/(C)/©/g" | sed -e "s/(R)/®/g"`
 #уберём двойные пробелы:
