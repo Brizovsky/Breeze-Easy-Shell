@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 21"
+ver="v1.10.0 Beta 22"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -589,10 +589,12 @@ then
 else
 	echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"	
 fi
+echo "    Название сервера (hostname): $(hostname)"
 echo "                             ОС: $osfamily $osver2"
 echo "                 Разрядность ОС: $arc bit"
 echo "              Версия ядра Linux: $kern"
 echo "                 Аптайм системы: $uptime"
+echo "Время на сервере (часовой пояс): $(date +%T) (GMT$(date +%:::z))"
 if [[ "$iface" != "" ]] #если интерфейс известен, то показываем
 then
 	echo "$space3Ваш IP на интерфейсе $iface: $ip" #длина строки скорректирована под длину название iface
