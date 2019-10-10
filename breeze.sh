@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 24"
+ver="v1.10.0 Beta 25"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -279,20 +279,21 @@ service iptables save
 
 openport()
 {
+if [[ -n "$(echo $3 | grep ,)" || -n "$(echo $3 | grep :)" ]]; then multi="-m multiport"; else multi=""; fi #Если порты указаны через запятую или двоеточие, то включаем мультипорт
 chain=$(echo $1 | tr [:lower:] [:upper:])
 if [ "$chain" == "IN" ]; then chain="INPUT"; t1="dport"
 else
 	if [ "$chain" == "OUT" ]; then chain="OUTPUT";  t1="sport"
 	else
 		if [ "$chain" == "FWD" ]; then chain="FORWARD";  t1="sport"
-			iptables -I $chain -p $2 --dport $3 -j ACCEPT #дополнительная строка для варианта с FORWARD
+			iptables -I $chain -p $2 $multi --dport $3 -j ACCEPT #дополнительная строка для варианта с FORWARD
 		else
 			echo "неправильно указано направление правила для открытия порта"
 			wait
 		fi
 	fi
 fi
-iptables -I $chain -p $2 --$t1 $3 -j ACCEPT #возможно в будущем предусмотрю выбор ключа -I или -A
+iptables -I $chain -p $2 $multi --$t1 $3 -j ACCEPT #возможно в будущем предусмотрю выбор ключа -I или -A
 iptables_save
 }
 
@@ -1364,7 +1365,8 @@ fi
       ;;
       esac
       br
-      echo "Укажите какой порт вы хотите открыть:"
+      echo "Укажите какой порт вы хотите открыть. Один порт, несколько портов через запятую"
+      echo "или диапазон портов через двоеточие (всегда БЕЗ ПРОБЕЛОВ):"
       read port
       br
       echo "Выберите протокол, по которому его нужно открыть:"
