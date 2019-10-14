@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 25"
+ver="v1.10.0 Beta 26"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -560,8 +560,8 @@ whatismyip
 echo "┌──────────────────────────────────────────────────────────────┐"
 echo "│                     Информация о системе                     │"
 echo "└──────────────────────────────────────────────────────────────┘"
-echo "                      CPU Cores: $cpu_cores x $cpu_clock MHz"
-if [ $cpu_clock_max -ne 0 ]; then echo -n " (max $cpu_clock_max MHz)"; fi #выводим только если есть CPU max
+echo -n "                      CPU Cores: $cpu_cores x $cpu_clock MHz"
+if [ $cpu_clock_max -ne 0 ]; then echo " (max $cpu_clock_max MHz)"; else echo; fi #выводим только если есть CPU max
 echo "                      CPU Model: $cpu_model"
 if [ $swap_mb -eq 0 ]; then echo "                            RAM: $mem_mb Mb"; else
 echo "                            RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"; fi
