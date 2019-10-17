@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 26"
+ver="v1.10.0 Beta 27"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -469,16 +469,18 @@ fi
 disk () {
 case "$1" in
 	total) #сколько места всего на диске
-		n=2
-	;;
-	used) #сколько использовано
 		n=3
 	;;
-	free) #сколько места свободно
+	used) #сколько использовано
 		n=4
 	;;
+	free) #сколько места свободно
+		n=5
+	;;
 esac
-	disk_result=$(df | grep / | awk '{print $'$n'}' | ( #берём в итоге все строки (можно брать только часть, если выставить /dev/ в grep) и берем только нужный столбик в зависимости от переданного в функцию значения total/used/free
+	#let "n=$n-1"; disk_result=$(df | grep /dev/ | awk '{print $'$n'}' | ( #Вариант, который берет всё с /dev/, но туда попадают tmpfs
+	#let "n=$n-1"; disk_result=$(df -l --total | grep total | awk '{print $'$n'}' | ( #Вариант, в котором берут только локальные диски и сразу смотрим total
+	disk_result=$(df -l -T | grep ext | awk '{print $'$n'}' | ( #Вариант, который берет только с файловыми системами extX
 		sum=0 #обнуляем сумму
 		while read hdd #начинаем перебор, пока есть строки (на случай, если несколько винтов)
 		do
@@ -570,6 +572,8 @@ disk total
 hdd_total=$disk_result
 disk free
 hdd_free=$disk_result
+let "hdd_free_percent1=$hdd_free * 100 / $hdd_total" #считаем сколько процентов осталось
+let "hdd_free_percent2=$hdd_free * 1000 / $hdd_total - $hdd_free_percent1 * 10" #считаем столько осталось десятых долей процента
 let "hdd_total_mb=$hdd_total / 1024"
 let "hdd_free_mb=$hdd_free / 1024"
 if [ $hdd_total_mb -ge 100000 ]
@@ -587,9 +591,9 @@ uptime=$(echo "${uptime%,* user*}")
 uptime=$(echo "${uptime#*up }")
 if [ $hdd_total_mb -ge 100000 ]
 then
-	echo "                            HDD: $hdd_total_gb1,$hdd_total_gb2 Gb (свободно $hdd_free_gb1,$hdd_free_gb2 Gb)"
+	echo "                            HDD: $hdd_total_gb1,$hdd_total_gb2 Gb (свободно $hdd_free_gb1,$hdd_free_gb2 Gb или $hdd_free_percent1,$hdd_free_percent2%)"
 else
-	echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"	
+	echo "                            HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb или $hdd_free_percent1,$hdd_free_percent2%)"	
 fi
 echo "    Название сервера (hostname): $(hostname)"
 echo "                             ОС: $osfamily $osver2"
