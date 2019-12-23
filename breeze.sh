@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 27"
+ver="v1.10.0 Beta 28"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -1116,7 +1116,7 @@ fi
     echo "htop (более продвинутый мониторинг ресурсов)"
     echo "nano (простейший текстовый редактор)"
     if [ $osver1 -ne 5 ]; then echo "аддон для yum, который позволяет удалять программы со всеми зависимостями"; fi #Не для CentOS 5
-    if [ $osver1 -eq 7 ]; then echo "net-tools (чтобы вернуть команду ifconfig)"; fi #Только для CentOS 7
+    if [ $osver1 -eq 7 ]; then echo "net-tools (чтобы вернуть команду ifconfig)"; echo "iptables-services (чтобы работала типовая функция сохранения правил iptables)"; fi #Только для CentOS 7
     br
     wait
     echo "Начинаем установку программ..."
@@ -1124,7 +1124,7 @@ fi
     yum -y install htop
     yum -y install nano
     if [ $osver1 -ne 5 ]; then yum -y install yum-remove-with-leaves; fi #Не для CentOS 5
-    if [ $osver1 -eq 7 ]; then yum -y install net-tools; fi #Только для CentOS 7
+    if [ $osver1 -eq 7 ]; then yum -y install net-tools iptables-services; fi #Только для CentOS 7
     br
     echo "Программы были установлены."
     wait    
@@ -1226,12 +1226,13 @@ fi
         y|Y)
         echo "Начинаем настройку iptables"
 		#Проверка на CentOS 7
-        if [ $osver1 -eq 7 ]; then 
+    if [ $osver1 -eq 7 ]; then 
         systemctl stop firewalld
-		systemctl mask firewalld
-		myinstall iptables-services | tee > /dev/null
-		systemctl enable iptables
-        fi
+        systemctl disable firewalld
+        systemctl mask firewalld
+        myinstall iptables-services | tee > /dev/null
+        systemctl enable iptables
+    fi
         iptables -F
         iptables -X
         iptables -A INPUT -i lo -j ACCEPT
