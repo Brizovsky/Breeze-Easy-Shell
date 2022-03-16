@@ -2092,6 +2092,9 @@ myread_dig pick
         #CentOS 5
         if [ $osver1 -eq 5 ]; then rpm -Uvh http://pptpclient.sourceforge.net/yum/stable/rhel5/pptp-release-current.noarch.rpm; fi
         yum -y install ppp pptpd pptp
+        modprobe ppp_async
+        modprobe ppp_deflate
+        modprobe ppp_mppe
         br
         whatismyipext
           #открываем порты и настраиваем маршрутизацию
