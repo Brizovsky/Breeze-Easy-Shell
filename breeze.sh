@@ -402,7 +402,7 @@ whatismyipext()
 if [[ "$ipext" = "" ]]; then
 	installed wget
 	if [ $exist == false ]; then myinstall wget; fi
-	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "return" | sed q | awk {'print $2'} | sed -e "s/'//g"`
+	ipext=` wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "return" | grep "IP адрес" | awk {'print $4'} | sed -e "s/'//g"`
 	if [ ${#ipext} -lt 7 ]; then ipext=""; fi #если длина ipext меньше 7 символов, то обнуляем его, потому что там что попало
 	if [[ "$ipext" = "" ]]; then
 		echo "Не удалось определить внешний IP. Введите его вручную (можете оставить пустым, но при этом неправильно будет работать часть функционала):"
