@@ -4,7 +4,7 @@
 # Базовые переменные
 #--------------------------------------------------------
 
-ver="v1.10.0 Beta 28"
+ver="v1.10.0 Beta 29"
 title="Breeze Easy Shell"
 title_full="$title $ver"
 filename='breeze.sh'
@@ -81,6 +81,12 @@ case "$1" in
 echo "цвет указан неверно. Поддерживается только green, blue, red и default/normal"
   ;;
 esac
+}
+
+# выделяет переданный текст красным
+red_text()
+{
+  echo -e "$red$bgcolor$1$textcolor$bgcolor"
 }
 
 my_clear()
@@ -866,7 +872,7 @@ menu3="
 │ ├───┼────────────────────────┤
 ├─┤ 3 │ Brainy CP              │
 │ ├───┼────────────────────────┤
-├─┤ 4 │ Vesta CP               │
+├─┤ 4 │ Vesta CP $(red_text '*')             │
 │ ├───┼────────────────────────┤
 ├─┤ 5 │ Webuzo                 │
 │ ├───┼────────────────────────┤
@@ -878,6 +884,8 @@ menu3="
 │ ├───┼────────────────────────┤
 └─┤ 0 │ Выйти на уровень вверх │
   └───┴────────────────────────┘
+
+$(red_text '*') На мой взгляд Vesta CP - самая лучшая из бесплатных панелей, однако, требует много места на диске
 "
 menu4="
 ● Установка и настройка VPN-сервера:
@@ -1024,6 +1032,9 @@ myread_dig pick
       	do
       	space3=$space3" "
       	done
+		my_clear
+		showinfo #и отрисовываем ещё раз уже полностью
+    whatismyipext # потом запрашиваем внешний ip
 		my_clear
 		showinfo #и отрисовываем ещё раз уже полностью
 		br
@@ -1770,11 +1781,14 @@ fi
     my_clear
     echo "Текущее название сервера: \"$(hostname)\""
     echo "Введите новое название сервера:"
-    myread hostname
+    read hostname
+    # если значение не пустое (иначе - завершим операцию)
+    if [ $hostname != "" ]; then
     hostnamectl set-hostname $hostname
     echo "Данные успешно изменены. Новое название сервера: \"$(hostname)\""
     br
     wait
+    fi
     ;;
     0)
     chosen=0
@@ -2777,6 +2791,7 @@ echo '└──────────┘'
 echo "Здесь вы можете ввести любую команду, которую поддерживает bash."
 echo "Кроме этого, поддерживаются внутренние команды $title"
 echo 'Такие как: myinstall, uninstall, openport, changelog, updatescript, about и др.'
+echo 'Цвет текста в приложении можно сменить с помощью команды "color green/red/blue/default"'
 echo 'Для выхода из терминала наберите "exit" или "quit".'
 br
 echo "Введите команду:"
